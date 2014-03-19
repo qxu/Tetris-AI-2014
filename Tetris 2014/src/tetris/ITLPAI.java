@@ -6,26 +6,28 @@
 
 package tetris;
 
+import debug.Debug;
 import AIHelper.BoardRater;
 import AIHelper.FinalRater;
 
 /**
- *
+ * 
  * @author justinbehymer
  */
-public class ITLPAI implements AI 
-{
-    
-BoardRater boardRater = new FinalRater();
-    
-public Move bestMove(Board board, Piece piece, Piece nextPiece, int limitHeight) 
-{
+public class ITLPAI implements AI {
+
+	BoardRater boardRater = new FinalRater();
+
+	public Move bestMove(Board board, Piece piece, Piece nextPiece,
+			int limitHeight) {
 		double bestScore = 1e20;
 		int bestX = 0;
 		int bestY = 0;
 		Piece bestPiece = piece;
 		Piece current = piece;
 
+		Debug.printPiece(piece);
+		
 		// loop through all the rotations
 		do {
 			final int yBound = limitHeight - current.getHeight() + 1;
@@ -59,11 +61,11 @@ public Move bestMove(Board board, Piece piece, Piece nextPiece, int limitHeight)
 		move.y = bestY;
 		move.piece = bestPiece;
 		return (move);
-}
+	}
 
-    @Override
-    public void setRater(BoardRater r) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-    
+	@Override
+	public void setRater(BoardRater r) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
 }
