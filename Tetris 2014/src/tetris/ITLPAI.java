@@ -25,8 +25,6 @@ public class ITLPAI implements AI {
 		int bestY = 0;
 		Piece bestPiece = piece;
 		Piece current = piece;
-
-		Debug.printPiece(piece);
 		
 		// loop through all the rotations
 		do {
@@ -60,6 +58,8 @@ public class ITLPAI implements AI {
 		move.x = bestX;
 		move.y = bestY;
 		move.piece = bestPiece;
+
+		Debug.printPiece(bestPiece);
 		return (move);
 	}
 
