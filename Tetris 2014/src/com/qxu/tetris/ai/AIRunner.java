@@ -10,9 +10,9 @@ import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Eval;
 
 public class AIRunner {
-	private static final double[] c = { 3.003598243720936, -2.6008686506403857,
-			-23.90707274385931, -16.37067481561546, -11.453920005901825,
-			0.35985468486267336 };
+	private static final double[] c = { -3.728937582015992,
+			-20.019104358673093, -6.607740852355959, -3.6078561449050897,
+			-1.5987364521026617 };
 
 	public static void main(String[] args) {
 		final Object buttonLock = new Object();
@@ -30,7 +30,7 @@ public class AIRunner {
 		frame.getContentPane().add(button);
 		frame.pack();
 		frame.setVisible(true);
-		
+
 		RaterAI ai = new RaterAI(new FinalRater(c));
 		Eval eval = new Eval(20, 10);
 		int score = eval.evalAndDisplayOnce(ai, new Runnable() {

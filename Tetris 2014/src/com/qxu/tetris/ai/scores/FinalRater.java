@@ -6,9 +6,9 @@ public class FinalRater implements BoardRater {
 	public static BoardRater[] RATERS = {
 			HeightMax.INSTANCE,
 			SimpleHoles.INSTANCE,
-			ThreeVariance.INSTANCE,
 			TroughCount.INSTANCE,
-			BlocksAboveHoles.INSTANCE
+			BlocksAboveHoles.INSTANCE,
+			Bumpiness.INSTANCE
 	};
 	
 	private double[] coefficients;
