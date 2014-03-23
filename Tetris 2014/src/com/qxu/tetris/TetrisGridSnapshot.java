@@ -1,43 +1,13 @@
 package com.qxu.tetris;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
 
 public class TetrisGridSnapshot {
-
-	public static TetrisGridSnapshot fromString(String s) {
-		byte[] bytes = new byte[s.length() / 2];
-		for (int i = 0; i < bytes.length; i++) {
-			bytes[i] = (byte) Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
-		}
-		System.out.println(Arrays.toString(bytes));
-		return fromBytes(bytes);
-	}
-
-	public static TetrisGridSnapshot fromBytes(byte[] b) {
-		ByteBuffer buf = ByteBuffer.wrap(b);
-		int height = buf.getInt();
-		int width = buf.getInt();
-		long[] data = new long[height];
-		for (int i = 0; i < height; i++) {
-			data[i] = buf.getLong();
-		}
-		TetrisBlock moveBlock = null;
-		int moveColumn = 0;
-
-		if (buf.getLong() != 0) {
-			int tOrdinal = buf.getInt();
-			int orientation = buf.getInt();
-			Tetromino[] tetrominoes = Tetromino.values();
-			moveBlock = tetrominoes[tOrdinal].getBlockChain().get(orientation);
-			moveColumn = buf.getInt();
-		}
-
-		return new TetrisGridSnapshot(height, width, data, moveBlock,
-				moveColumn);
-	}
-
 	private final int height;
 	private final int width;
 
@@ -60,13 +30,25 @@ public class TetrisGridSnapshot {
 		this.moveColumn = moveColumn;
 	}
 
-	private TetrisGridSnapshot(int height, int width, long[] data,
-			TetrisBlock moveBlock, int moveColumn) {
-		this.height = height;
-		this.width = width;
-		this.data = data;
-		this.moveBlock = moveBlock;
-		this.moveColumn = moveColumn;
+	public TetrisGridSnapshot(InputStream in) throws IOException {
+		DataInputStream d = new DataInputStream(in);
+		this.height = d.readInt();
+		this.width = d.readInt();
+		this.data = new long[height];
+		for (int i = 0; i < height; i++) {
+			data[i] = d.readLong();
+		}
+
+		if (d.readBoolean()) {
+			int tOrdinal = d.readInt();
+			int orientation = d.readInt();
+			Tetromino[] tetrominoes = Tetromino.values();
+			this.moveBlock = tetrominoes[tOrdinal].getBlockChain().get(orientation);
+			this.moveColumn = d.readInt();
+		} else {
+			this.moveBlock = null;
+			this.moveColumn = 0;
+		}
 	}
 
 	public TetrisGrid createGrid() {
@@ -90,6 +72,24 @@ public class TetrisGridSnapshot {
 	public int getMoveColumn() {
 		return moveColumn;
 	}
+	
+	public void writeTo(OutputStream out) throws IOException {
+		DataOutputStream d = new DataOutputStream(out);
+		d.writeInt(height);
+		d.writeInt(width);
+		for (int i = 0; i < height; i++) {
+			d.writeLong(data[i]);
+		}
+		if (moveBlock != null) {
+			d.writeBoolean(true);
+			int[] blockCode = getBlockCode(moveBlock);
+			d.writeInt(blockCode[0]);
+			d.writeInt(blockCode[1]);
+			d.writeInt(moveColumn);
+		} else {
+			d.writeBoolean(false);
+		}
+	}
 
 	private int[] getBlockCode(TetrisBlock block) {
 		Tetromino[] tetrominoes = Tetromino.values();
@@ -103,37 +103,8 @@ public class TetrisGridSnapshot {
 		throw new AssertionError("Unknown tetris block: \n" + block + "\n");
 	}
 
-	public byte[] toByteArray() {
-		int capacity = 4 + 4 + data.length * 8 + 8;
-		if (moveBlock != null) {
-			capacity += 4 + 4 + 4;
-		}
-		ByteBuffer buf = ByteBuffer.allocate(capacity);
-		buf.putInt(height);
-		buf.putInt(width);
-		for (int i = 0; i < height; i++) {
-			buf.putLong(data[i]);
-		}
-		if (moveBlock != null) {
-			buf.putLong(1);
-			int[] blockCode = getBlockCode(moveBlock);
-			buf.putInt(blockCode[0]);
-			buf.putInt(blockCode[1]);
-			buf.putInt(moveColumn);
-		} else {
-			buf.putLong(0);
-		}
-		return buf.array();
-	}
-
 	@Override
 	public String toString() {
-		byte[] bytes = toByteArray();
-		StringBuilder sb = new StringBuilder(bytes.length * 2);
-		for (byte b : bytes) {
-			sb.append(Character.forDigit((b & 0xff) >>> 4, 16));
-			sb.append(Character.forDigit(b & 0xf, 16));
-		}
-		return sb.toString();
+		return createGrid().toString();
 	}
 }

@@ -27,7 +27,7 @@ public class RaterAI implements TetrisAI {
 			int maxCol = grid.getWidth() - block.getData().getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row < grid.getHeight()) {
+				if (row + block.getData().getHeight() <= grid.getHeight()) {
 					TetrisGrid subGrid = new TetrisGrid(grid);
 					subGrid.addBlock(row, c, block);
 					double score = rater.rate(subGrid);

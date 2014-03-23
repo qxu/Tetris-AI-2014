@@ -2,6 +2,10 @@ package com.qxu.tetris.gfx;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -19,12 +23,19 @@ import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
-	private static String sss;
-	private static boolean useSss = false;
+	private static String ssPath = "snapshot.dat";
 	private static TetrisGridSnapshot snapshot;
 	static {
-		if (useSss && sss != null) {
-			snapshot = TetrisGridSnapshot.fromString(sss);
+		File f = new File(ssPath);
+		if (f.exists()) {
+			try {
+				FileInputStream in = new FileInputStream(f);
+				snapshot = new TetrisGridSnapshot(in);
+				System.out.println("snapshot loaded");
+				in.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -81,13 +92,11 @@ public class TetrisRunner implements Runnable {
 					if (moveColumn > 0) {
 						moveColumn--;
 					}
-					System.out.println(grid.getColumnHeight(moveColumn));
 				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 					BlockData data = moveBlock.getData();
 					if (moveColumn + data.getWidth() < grid.getWidth()) {
 						moveColumn++;
 					}
-					System.out.println(grid.getColumnHeight(moveColumn));
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 					moveBlock = moveBlock.getNextRotation();
 					BlockData data = moveBlock.getData();
@@ -107,7 +116,17 @@ public class TetrisRunner implements Runnable {
 				} else if (e.getKeyCode() == KeyEvent.VK_SLASH) {
 					TetrisGridSnapshot snapshot = new TetrisGridSnapshot(grid,
 							moveBlock, moveColumn);
-					System.out.println(snapshot.toString());
+					try {
+						File f = new File(ssPath);
+						FileOutputStream out = new FileOutputStream(f, false);
+						snapshot.writeTo(out);
+						out.flush();
+						System.out.println("snapshot saved to: "
+								+ f.getAbsolutePath());
+						out.close();
+					} catch (IOException ex) {
+						ex.printStackTrace();
+					}
 					return;
 				} else {
 					return;
@@ -153,7 +172,6 @@ public class TetrisRunner implements Runnable {
 			}
 
 			if (saveMove) {
-
 			}
 
 			grid.addBlock(dropRow, moveColumn, moveBlock);

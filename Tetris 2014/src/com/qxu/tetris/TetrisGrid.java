@@ -35,16 +35,10 @@ public class TetrisGrid {
 	public int getDropRow(int column, TetrisBlock block) {
 		BlockData data = block.getData();
 		int blockWidth = data.getWidth();
-		int blockHeight = data.getHeight();
 
 		int dropRow = 0;
 		for (int x = 0; x < blockWidth; x++) {
 			int blockPadding = data.getBottomPadding(x);
-			for (int r = height - blockHeight + blockPadding; r < height; r++) {
-				if (get(r, x + column)) {
-					return height;
-				}
-			}
 			int row = getColumnHeight(x + column) - blockPadding;
 			if (row > dropRow) {
 				dropRow = row;
