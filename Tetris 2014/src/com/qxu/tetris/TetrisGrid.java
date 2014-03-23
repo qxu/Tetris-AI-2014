@@ -3,8 +3,8 @@ package com.qxu.tetris;
 import java.util.Arrays;
 
 public class TetrisGrid {
-	private int height;
-	private int width;
+	private final int height;
+	private final int width;
 
 	private long[] data;
 	private int[] heights;
@@ -29,11 +29,7 @@ public class TetrisGrid {
 	}
 
 	public int getColumnHeight(int column) {
-		for (int r = height - 1; r >= 0; r--) {
-			if (get(r, column))
-				return r + 1;
-		}
-		return 0;
+		return heights[column];
 	}
 
 	public int getDropRow(int column, TetrisBlock block) {
@@ -43,10 +39,7 @@ public class TetrisGrid {
 
 		int dropRow = 0;
 		for (int x = 0; x < blockWidth; x++) {
-			int blockPadding = 0;
-			while (blockPadding < blockHeight && !data.get(blockPadding, x)) {
-				blockPadding++;
-			}
+			int blockPadding = data.getBottomPadding(x);
 			for (int r = height - blockHeight + blockPadding; r < height; r++) {
 				if (get(r, x + column)) {
 					return height;
@@ -70,30 +63,22 @@ public class TetrisGrid {
 		}
 		boolean hasBase = false;
 		for (int x = 0; x < blockWidth; x++) {
-			for (int r = row + blockHeight - 1; r < height; r++) {
-				if (get(r, x + column)) {
-					return false;
-				}
+			int colHeight = getColumnHeight(column + x);
+			int blockPadding = data.getBottomPadding(x);
+
+			if (blockPadding + colHeight + row < 0) {
+				return false;
 			}
-			for (int y = blockHeight - 1; y >= 0; y--) {
-				if (!data.get(y, x)) {
-					if (get(y + row, x + column)) {
-						return false;
-					}
-				} else {
-					break;
-				}
-			}
-			int blockPadding = 0;
-			while (blockPadding < blockHeight && !data.get(blockPadding, x)) {
-				blockPadding++;
-			}
-			int r = blockPadding + row - 1;
-			if (r == -1 || get(r, x + column)) {
+			if (blockPadding + colHeight + row == 0) {
 				hasBase = true;
 			}
 		}
 		return hasBase;
+	}
+
+	public boolean get(int row, int column) {
+		checkBounds(row, column);
+		return (data[row] & (1L << column)) != 0;
 	}
 
 	public void addBlock(int row, int column, TetrisBlock block) {
@@ -103,31 +88,32 @@ public class TetrisGrid {
 		checkBounds(row, column);
 		checkBounds(row + blockHeight - 1, column + blockWidth - 1);
 
-		for (int y = 0; y < blockHeight; y++) {
-			for (int x = 0; x < blockWidth; x++) {
+		for (int x = 0; x < blockWidth; x++) {
+			for (int y = 0; y < blockHeight; y++) {
 				if (data.get(y, x)) {
-					set(row + y, column + x);
+					internalSet(row + y, column + x);
 				}
 			}
+			updateHeights(column + x);
 		}
 	}
 
-	public void clearRowAndShiftDown(int row) {
-		checkRowBounds(row);
-		System.arraycopy(data, row + 1, data, row, data.length - row - 1);
-		data[data.length - 1] = 0L;
-	}
-
 	public int clearFullRows() {
-		long fullRow = (1L << width) - 1L;
+		final long fullRow = (1L << width) - 1L;
 		int clearedCount = 0;
 		int r = 0;
 		while (r + clearedCount < height) {
 			if (data[r] == fullRow) {
-				clearRowAndShiftDown(r);
+				System.arraycopy(data, r + 1, data, r, data.length - r - 1);
+				data[data.length - 1] = 0L;
 				clearedCount++;
 			} else {
 				r++;
+			}
+		}
+		if (clearedCount > 0) {
+			for (int c = 0; c < width; c++) {
+				updateHeights(c);
 			}
 		}
 		return clearedCount;
@@ -144,26 +130,17 @@ public class TetrisGrid {
 	public void set(int row, int column) {
 		checkBounds(row, column);
 		data[row] |= 1L << column;
+		updateHeights(column);
+	}
+	
+	private void internalSet(int row, int column) {
+		data[row] |= 1L << column;
 	}
 
 	public void clear(int row, int column) {
 		checkBounds(row, column);
 		data[row] &= ~(1L << column);
-	}
-
-	public boolean get(int row, int column) {
-		checkBounds(row, column);
-		return (data[row] & (1L << column)) != 0;
-	}
-
-	public long get(int row) {
-		checkRowBounds(row);
-		return data[row];
-	}
-
-	private void checkBounds(int row, int column) {
-		checkRowBounds(row);
-		checkColumnBounds(column);
+		updateHeights(column);
 	}
 
 	public int getHeight() {
@@ -172,6 +149,11 @@ public class TetrisGrid {
 
 	public int getWidth() {
 		return width;
+	}
+
+	private void checkBounds(int row, int column) {
+		checkRowBounds(row);
+		checkColumnBounds(column);
 	}
 
 	private void checkRowBounds(int row) {
@@ -183,6 +165,15 @@ public class TetrisGrid {
 	private void checkColumnBounds(int column) {
 		if (column < 0 || column >= width) {
 			throw new IndexOutOfBoundsException("Column: " + column);
+		}
+	}
+
+	private void updateHeights(int column) {
+		for (int r = height - 1; r >= 0; r--) {
+			if (get(r, column)) {
+				heights[column] = r + 1;
+				return;
+			}
 		}
 	}
 

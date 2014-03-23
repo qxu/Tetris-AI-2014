@@ -37,6 +37,8 @@ public class AIRunner implements Runnable {
 	private Object moveLock = new Object();
 	private boolean nextMove = false;
 
+	private boolean saveMove = false;
+
 	public AIRunner() {
 		this.ai = new RaterAI(new FinalRater(c));
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
@@ -64,11 +66,13 @@ public class AIRunner implements Runnable {
 					if (moveColumn > 0) {
 						moveColumn--;
 					}
+					System.out.println(grid.getColumnHeight(moveColumn));
 				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
 					BlockData data = moveBlock.getData();
 					if (moveColumn + data.getWidth() < grid.getWidth()) {
 						moveColumn++;
 					}
+					System.out.println(grid.getColumnHeight(moveColumn));
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 					moveBlock = moveBlock.getNextRotation();
 					BlockData data = moveBlock.getData();
@@ -80,7 +84,14 @@ public class AIRunner implements Runnable {
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_DOWN
 						|| e.getKeyCode() == KeyEvent.VK_ENTER) {
+					saveMove = false;
 					nextMove = true;
+				} else if (e.getKeyCode() == KeyEvent.VK_S) {
+					saveMove = true;
+					nextMove = true;
+				} else if (e.getKeyCode() == KeyEvent.VK_P) {
+					
+					return;
 				} else {
 					return;
 				}
@@ -114,10 +125,15 @@ public class AIRunner implements Runnable {
 				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 				comp.repaint();
 			}
+			
+			if (saveMove) {
+				
+			}
 
 			grid.addBlock(dropRow, moveColumn, moveBlock);
-			this.moveBlock = null;
+			moveBlock = null;
 			nextMove = false;
+			saveMove = false;
 
 			comp.setMoveBlock(null, 0, 0);
 			comp.repaint();
