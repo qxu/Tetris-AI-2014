@@ -47,7 +47,7 @@ public class AIRunner implements Runnable {
 	private Object moveLock = new Object();
 	private boolean nextMove = false;
 
-	private boolean saveMove = false;
+	private boolean saveMove = true;
 
 	public AIRunner() {
 		this.ai = new RaterAI(new FinalRater(c));
@@ -97,12 +97,12 @@ public class AIRunner implements Runnable {
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_DOWN
 						|| e.getKeyCode() == KeyEvent.VK_ENTER) {
-					saveMove = false;
-					nextMove = true;
-				} else if (e.getKeyCode() == KeyEvent.VK_S) {
 					saveMove = true;
 					nextMove = true;
-				} else if (e.getKeyCode() == KeyEvent.VK_P) {
+				} else if (e.getKeyCode() == KeyEvent.VK_COMMA) {
+					saveMove = false;
+					nextMove = true;
+				} else if (e.getKeyCode() == KeyEvent.VK_SLASH) {
 					TetrisGridSnapshot snapshot = new TetrisGridSnapshot(grid,
 							moveBlock, moveColumn);
 					System.out.println(snapshot.toString());
@@ -157,7 +157,7 @@ public class AIRunner implements Runnable {
 			grid.addBlock(dropRow, moveColumn, moveBlock);
 			moveBlock = null;
 			nextMove = false;
-			saveMove = false;
+			saveMove = true;
 
 			comp.setMoveBlock(null, 0, 0);
 			comp.repaint();
