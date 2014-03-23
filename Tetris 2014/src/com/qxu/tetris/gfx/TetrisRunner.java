@@ -23,6 +23,8 @@ import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
+	private static String savePath = "saves.dat";
+	
 	private static String ssPath = "snapshot.dat";
 	private static TetrisGridSnapshot snapshot;
 	static {
