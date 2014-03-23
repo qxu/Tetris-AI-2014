@@ -1,4 +1,4 @@
-package com.qxu.tetris.ai;
+package com.qxu.tetris.gfx;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -12,11 +12,13 @@ import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
+import com.qxu.tetris.ai.AIMove;
+import com.qxu.tetris.ai.RaterAI;
+import com.qxu.tetris.ai.TetrisAI;
 import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Debug;
-import com.qxu.tetris.gfx.TetrisGridJComponent;
 
-public class AIRunner implements Runnable {
+public class TetrisRunner implements Runnable {
 	private static String sss;
 	private static boolean useSss = false;
 	private static TetrisGridSnapshot snapshot;
@@ -49,7 +51,7 @@ public class AIRunner implements Runnable {
 
 	private boolean saveMove = true;
 
-	public AIRunner() {
+	public TetrisRunner() {
 		this.ai = new RaterAI(new FinalRater(c));
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
 		if (snapshot != null) {
@@ -176,7 +178,7 @@ public class AIRunner implements Runnable {
 	}
 
 	public static void main(String[] args) {
-		AIRunner runner = new AIRunner();
+		TetrisRunner runner = new TetrisRunner();
 		runner.run();
 	}
 }
