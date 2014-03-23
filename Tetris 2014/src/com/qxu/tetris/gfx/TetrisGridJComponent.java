@@ -12,15 +12,18 @@ import com.qxu.tetris.TetrisGrid;
 
 @SuppressWarnings("serial")
 public class TetrisGridJComponent extends JComponent {
+
+	private static final int cellSize = 20;
+	private static final int borderSize = 1;
+
 	private static final Color filledCellColor = Color.LIGHT_GRAY;
 	private static final Color emptyCellColor = Color.DARK_GRAY;
 	private static final Color moveCellColor = Color.CYAN;
 	private static final Color borderColor = Color.BLACK;
 
+	
+	
 	private TetrisGrid grid;
-
-	private int cellSize;
-	private int borderSize;
 
 	private TetrisBlock moveBlock;
 	private int moveRow;
@@ -28,26 +31,6 @@ public class TetrisGridJComponent extends JComponent {
 
 	public TetrisGridJComponent(TetrisGrid grid) {
 		this.grid = grid;
-		this.cellSize = 8;
-		this.borderSize = 1;
-		initSize();
-	}
-
-	public int getCellSize() {
-		return cellSize;
-	}
-
-	public void setCellSize(int cellSize) {
-		this.cellSize = cellSize;
-		initSize();
-	}
-
-	public int getBorderSize() {
-		return borderSize;
-	}
-
-	public void setBorderSize(int borderSize) {
-		this.borderSize = borderSize;
 		initSize();
 	}
 

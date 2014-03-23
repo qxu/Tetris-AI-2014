@@ -6,6 +6,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -47,6 +50,8 @@ public class TetrisRunner implements Runnable {
 
 	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
+	
+	private static final int seekSize = 4;
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 
@@ -55,9 +60,12 @@ public class TetrisRunner implements Runnable {
 	private TetrisAI ai;
 	private TetrisGrid grid;
 	private TetrisGridJComponent comp;
+	private TetrominoNextJComponent nextComp;
 
 	private int moveColumn;
 	private TetrisBlock moveBlock;
+	
+	private Deque<Tetromino> next;
 
 	private Object moveLock = new Object();
 	private boolean nextMove = false;
@@ -72,11 +80,12 @@ public class TetrisRunner implements Runnable {
 		}
 
 		this.comp = new TetrisGridJComponent(grid);
-		comp.setCellSize(20);
+		this.nextComp = new TetrominoNextJComponent(seekSize);
 
 		JFrame frame = new JFrame("Tetris");
 		JPanel panel = new JPanel();
 		panel.add(comp);
+		panel.add(nextComp);
 		frame.setContentPane(panel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -117,7 +126,7 @@ public class TetrisRunner implements Runnable {
 					nextMove = true;
 				} else if (e.getKeyCode() == KeyEvent.VK_SLASH) {
 					TetrisGridSnapshot snapshot = new TetrisGridSnapshot(grid,
-							moveBlock, moveColumn);
+							moveBlock, moveColumn, new ArrayList<>(next));
 					try {
 						File f = new File(ssPath);
 						FileOutputStream out = new FileOutputStream(f, false);
@@ -141,9 +150,16 @@ public class TetrisRunner implements Runnable {
 
 	@Override
 	public void run() {
+		next = new ArrayDeque<>(seekSize);
+		for (int i = 0; i < seekSize; i++) {
+			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+		}
+		nextComp.setNext(new ArrayList<>(next));
+		
 		int score = 0;
 		while (true) {
-			Tetromino t = TETROMINOES[rand.nextInt(TETROMINOES.length)];
+			Tetromino t = next.removeFirst();
+			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
 			AIMove move = ai.getMove(new TetrisGrid(grid), t);
 			if (move == null)
 				break;
@@ -165,7 +181,9 @@ public class TetrisRunner implements Runnable {
 			}
 
 			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
+			nextComp.setNext(new ArrayList<>(next));
 			comp.repaint();
+			nextComp.repaint();
 			while (!nextMove) {
 				Debug.waitFor(moveLock);
 				dropRow = grid.getDropRow(moveColumn, moveBlock);
