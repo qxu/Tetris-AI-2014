@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import com.qxu.tetris.BlockData;
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
+import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Debug;
@@ -90,7 +91,7 @@ public class AIRunner implements Runnable {
 					saveMove = true;
 					nextMove = true;
 				} else if (e.getKeyCode() == KeyEvent.VK_P) {
-					
+					System.out.println(new TetrisGridSnapshot(grid).toString());
 					return;
 				} else {
 					return;

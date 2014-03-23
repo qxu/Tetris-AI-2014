@@ -133,6 +133,10 @@ public class TetrisGrid {
 		updateHeights(column);
 	}
 	
+	public long[] getData() {
+		return data.clone();
+	}
+	
 	private void internalSet(int row, int column) {
 		data[row] |= 1L << column;
 	}
