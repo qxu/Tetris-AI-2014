@@ -17,6 +17,15 @@ import com.qxu.tetris.eval.Debug;
 import com.qxu.tetris.gfx.TetrisGridJComponent;
 
 public class AIRunner implements Runnable {
+	private static String sss;
+	private static boolean useSss = false;
+	private static TetrisGridSnapshot snapshot;
+	static {
+		if (useSss && sss != null) {
+			snapshot = TetrisGridSnapshot.fromString(sss);
+		}
+	}
+
 	private static final double[] c = { -3.728937582015992,
 			-20.019104358673093, -6.607740852355959, -3.6078561449050897,
 			-1.5987364521026617 };
@@ -43,6 +52,9 @@ public class AIRunner implements Runnable {
 	public AIRunner() {
 		this.ai = new RaterAI(new FinalRater(c));
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
+		if (snapshot != null) {
+			this.grid = snapshot.createGrid();
+		}
 
 		this.comp = new TetrisGridJComponent(grid);
 		comp.setCellSize(20);
@@ -91,7 +103,9 @@ public class AIRunner implements Runnable {
 					saveMove = true;
 					nextMove = true;
 				} else if (e.getKeyCode() == KeyEvent.VK_P) {
-					System.out.println(new TetrisGridSnapshot(grid).toString());
+					TetrisGridSnapshot snapshot = new TetrisGridSnapshot(grid,
+							moveBlock, moveColumn);
+					System.out.println(snapshot.toString());
 					return;
 				} else {
 					return;
@@ -111,12 +125,21 @@ public class AIRunner implements Runnable {
 			if (move == null)
 				break;
 
-			this.moveColumn = move.getColumn();
-			this.moveBlock = t.getBlockChain().get(move.getOrientation());
+			moveColumn = move.getColumn();
+			moveBlock = t.getBlockChain().get(move.getOrientation());
 
 			int dropRow = grid.getDropRow(moveColumn, moveBlock);
 			if (dropRow >= grid.getHeight())
 				break;
+
+			if (snapshot != null) {
+				if (snapshot.getMoveBlock() != null) {
+					moveColumn = snapshot.getMoveColumn();
+					moveBlock = snapshot.getMoveBlock();
+					dropRow = grid.getDropRow(moveColumn, moveBlock);
+				}
+				snapshot = null;
+			}
 
 			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 			comp.repaint();
@@ -126,9 +149,9 @@ public class AIRunner implements Runnable {
 				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 				comp.repaint();
 			}
-			
+
 			if (saveMove) {
-				
+
 			}
 
 			grid.addBlock(dropRow, moveColumn, moveBlock);

@@ -179,6 +179,7 @@ public class TetrisGrid {
 				return;
 			}
 		}
+		heights[column] = 0;
 	}
 
 	@Override

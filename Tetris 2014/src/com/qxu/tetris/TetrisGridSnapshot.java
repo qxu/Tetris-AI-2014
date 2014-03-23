@@ -1,6 +1,7 @@
 package com.qxu.tetris;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.List;
 
 public class TetrisGridSnapshot {
@@ -8,8 +9,9 @@ public class TetrisGridSnapshot {
 	public static TetrisGridSnapshot fromString(String s) {
 		byte[] bytes = new byte[s.length() / 2];
 		for (int i = 0; i < bytes.length; i++) {
-			bytes[i] = Byte.parseByte(s.substring(i * 2, i * 2 + 1), 16);
+			bytes[i] = (byte) Integer.parseInt(s.substring(i * 2, i * 2 + 2), 16);
 		}
+		System.out.println(Arrays.toString(bytes));
 		return fromBytes(bytes);
 	}
 
@@ -80,6 +82,14 @@ public class TetrisGridSnapshot {
 
 		return grid;
 	}
+	
+	public TetrisBlock getMoveBlock() {
+		return moveBlock;
+	}
+
+	public int getMoveColumn() {
+		return moveColumn;
+	}
 
 	private int[] getBlockCode(TetrisBlock block) {
 		Tetromino[] tetrominoes = Tetromino.values();
@@ -121,7 +131,8 @@ public class TetrisGridSnapshot {
 		byte[] bytes = toByteArray();
 		StringBuilder sb = new StringBuilder(bytes.length * 2);
 		for (byte b : bytes) {
-			sb.append(Integer.toHexString(b & 0xff));
+			sb.append(Character.forDigit((b & 0xff) >>> 4, 16));
+			sb.append(Character.forDigit(b & 0xf, 16));
 		}
 		return sb.toString();
 	}
