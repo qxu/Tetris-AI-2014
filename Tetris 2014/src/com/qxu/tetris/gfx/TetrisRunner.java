@@ -53,6 +53,8 @@ public class TetrisRunner implements Runnable {
 
 	private static final int seekSize = 1;
 
+	private static final boolean aSyncGfxUpdate = true;
+
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 
 	private static final Random rand = new Random();
@@ -94,6 +96,16 @@ public class TetrisRunner implements Runnable {
 
 		comp.setFocusable(true);
 		comp.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (aSyncGfxUpdate) {
+					if (e.getKeyCode() == KeyEvent.VK_DOWN
+							|| e.getKeyCode() == KeyEvent.VK_ENTER) {
+						nextMove = false;
+					}
+				}
+			}
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if (moveBlock == null)
@@ -146,6 +158,24 @@ public class TetrisRunner implements Runnable {
 				Debug.notifyAll(moveLock);
 			}
 		});
+		
+		if (aSyncGfxUpdate) {
+			Thread t = new Thread("async tetris gfx updater") {
+				@Override
+				public void run() {
+					while (true) {
+						comp.repaint();
+						nextComp.repaint();
+						try {
+							Thread.sleep(20);
+						} catch (InterruptedException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
+			};
+			t.start();
+		}
 	}
 
 	@Override
@@ -183,13 +213,17 @@ public class TetrisRunner implements Runnable {
 
 			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 			nextComp.setNext(new ArrayList<>(next));
-			comp.repaint();
-			nextComp.repaint();
+			if (!aSyncGfxUpdate) {
+				comp.repaint();
+				nextComp.repaint();
+			}
 			while (!nextMove) {
 				Debug.waitFor(moveLock);
 				dropRow = grid.getDropRow(moveColumn, moveBlock);
 				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
-				comp.repaint();
+				if (!aSyncGfxUpdate) {
+					comp.repaint();
+				}
 			}
 
 			if (saveMove) {
@@ -197,19 +231,25 @@ public class TetrisRunner implements Runnable {
 
 			grid.addBlock(dropRow, moveColumn, moveBlock);
 			moveBlock = null;
-			nextMove = false;
-			saveMove = true;
+			if (!aSyncGfxUpdate) {
+				nextMove = false;
+				saveMove = true;
+			}
 
 			comp.setMoveBlock(null, 0, 0);
-			comp.repaint();
+			if (!aSyncGfxUpdate) {
+				comp.repaint();
+			}
 
 			int rowsCleared = grid.clearFullRows();
 			if (rowsCleared > 0) {
 				score += rowsCleared;
 
 				System.out.println("score: " + score);
-				comp.repaint();
-				Debug.sleep(50);
+				if (!aSyncGfxUpdate) {
+					comp.repaint();
+					Debug.sleep(50);
+				}
 			}
 		}
 
