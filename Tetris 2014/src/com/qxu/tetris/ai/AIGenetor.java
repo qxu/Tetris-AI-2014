@@ -7,14 +7,27 @@ import java.util.Random;
 import com.qxu.tetris.eval.Eval;
 
 public class AIGenetor {
+	private static double average(ScorePair[] a) {
+		double average = 0.0;
+		for (ScorePair sp : a) {
+			average += sp.fitness / a.length;
+		}
+		return average;
+	}
+
 	public static void main(String[] args) {
 		AIGenetor gen = new AIGenetor(20, 10);
+		long lastTime = System.nanoTime();
 		while (true) {
 			gen.evolve();
+			System.out.println(gen.generation + ": " + average(gen.population));
 			System.out.println(gen.generation + ": "
-					+ gen.population[0].fitness);
-			System.out.println(Arrays.toString(gen.getBestCoeff())
+					+ Arrays.toString(gen.population));
+			System.out.println(Arrays.toString(gen.population[0].c)
 					.replace('[', '{').replace(']', '}'));
+			long time = System.nanoTime();
+			System.out.println("time: " + (time - lastTime) / 1.0e9 + " s");
+			lastTime = time;
 			System.out.println();
 		}
 	}
@@ -38,10 +51,6 @@ public class AIGenetor {
 
 	public int getGeneration() {
 		return this.generation;
-	}
-
-	public double[] getBestCoeff() {
-		return population[0].c;
 	}
 
 	public void evolve() {
@@ -89,7 +98,7 @@ public class AIGenetor {
 
 	private double getFitness(double[] c) {
 		RaterAI ai = new RaterAI(new FinalRater(c));
-		return eval.evalN(ai, 1, 30);
+		return eval.evalN(ai, 1, 1);
 	}
 
 	private static class ScorePair implements Comparable<ScorePair> {
