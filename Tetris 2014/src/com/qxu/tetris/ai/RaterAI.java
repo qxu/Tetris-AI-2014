@@ -6,7 +6,6 @@ import java.util.List;
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.Tetromino;
-import com.qxu.tetris.ai.scores.FinalRater;
 
 public class RaterAI implements TetrisAI {
 	private FinalRater rater;

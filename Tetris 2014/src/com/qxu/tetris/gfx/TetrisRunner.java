@@ -20,9 +20,9 @@ import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
+import com.qxu.tetris.ai.FinalRater;
 import com.qxu.tetris.ai.RaterAI;
 import com.qxu.tetris.ai.TetrisAI;
-import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
@@ -53,7 +53,7 @@ public class TetrisRunner implements Runnable {
 
 	private static final int seekSize = 1;
 
-	private static final boolean aSyncGfxUpdate = true;
+	private static final boolean aSyncGfxUpdate = false;
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 

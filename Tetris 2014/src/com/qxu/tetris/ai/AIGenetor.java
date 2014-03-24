@@ -4,12 +4,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Eval;
 
 public class AIGenetor {
 	public static void main(String[] args) {
-		AIGenetor gen = new AIGenetor(10, 10);
+		AIGenetor gen = new AIGenetor(20, 10);
 		while (true) {
 			gen.evolve();
 			System.out.println(gen.generation + ": "
@@ -90,7 +89,7 @@ public class AIGenetor {
 
 	private double getFitness(double[] c) {
 		RaterAI ai = new RaterAI(new FinalRater(c));
-		return eval.evalN(ai, 1, 4);
+		return eval.evalN(ai, 1, 30);
 	}
 
 	private static class ScorePair implements Comparable<ScorePair> {

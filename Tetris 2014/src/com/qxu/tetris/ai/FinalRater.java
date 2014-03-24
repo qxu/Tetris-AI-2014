@@ -1,6 +1,12 @@
-package com.qxu.tetris.ai.scores;
+package com.qxu.tetris.ai;
 
 import com.qxu.tetris.TetrisGrid;
+import com.qxu.tetris.ai.scores.BlocksAboveHoles;
+import com.qxu.tetris.ai.scores.BoardRater;
+import com.qxu.tetris.ai.scores.Bumpiness;
+import com.qxu.tetris.ai.scores.HeightMax;
+import com.qxu.tetris.ai.scores.SimpleHoles;
+import com.qxu.tetris.ai.scores.TroughCount;
 
 public class FinalRater implements BoardRater {
 	public static BoardRater[] RATERS = {
