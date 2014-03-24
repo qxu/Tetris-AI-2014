@@ -7,10 +7,10 @@ import java.util.Random;
 import com.qxu.tetris.eval.Eval;
 
 public class AIGenetor {
-	private static double average(ScorePair[] a) {
+	private static double average(ScorePair[] a, int n) {
 		double average = 0.0;
-		for (ScorePair sp : a) {
-			average += sp.fitness / a.length;
+		for (int i = 0; i < n; i++) {
+			average += a[i].fitness / n;
 		}
 		return average;
 	}
@@ -20,9 +20,9 @@ public class AIGenetor {
 		long lastTime = System.nanoTime();
 		while (true) {
 			gen.evolve();
-			System.out.println(gen.generation + ": " + average(gen.population));
 			System.out.println(gen.generation + ": "
-					+ Arrays.toString(gen.population));
+					+ average(gen.population, gen.breedSize));
+			System.out.println(Arrays.toString(gen.population));
 			System.out.println(Arrays.toString(gen.population[0].c)
 					.replace('[', '{').replace(']', '}'));
 			long time = System.nanoTime();

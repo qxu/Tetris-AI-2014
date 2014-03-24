@@ -26,6 +26,7 @@ import com.qxu.tetris.ai.TetrisAI;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
+	private static boolean save = false;
 	private static String savePath = "saves.dat";
 
 	private static String ssPath = "snapshot.dat";
@@ -44,16 +45,16 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-	private static final double[] c = { 0.7547293090820313,
-			-18.340888366699218, -9.092015380859374, -0.7960744018554687,
-			-1.3188953247070314 };
+	private static final double[] c = { -3.026514926926164,
+			-33.675084628522995, -16.06204544899791, 32.40241915416981,
+			-4.977469916697346 };
 
 	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
 
 	private static final int seekSize = 1;
 
-	private static final boolean aSyncGfxUpdate = false;
+	private static final boolean aSyncGfxUpdate = true;
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 
@@ -158,7 +159,7 @@ public class TetrisRunner implements Runnable {
 				Debug.notifyAll(moveLock);
 			}
 		});
-		
+
 		if (aSyncGfxUpdate) {
 			Thread t = new Thread("async tetris gfx updater") {
 				@Override
@@ -226,7 +227,17 @@ public class TetrisRunner implements Runnable {
 				}
 			}
 
-			if (saveMove) {
+			if (save && saveMove) {
+				File f = new File(savePath);
+				try {
+					FileOutputStream out = new FileOutputStream(f, true);
+					TetrisGridSnapshot ss = new TetrisGridSnapshot(grid, moveBlock, dropRow, null);
+					ss.writeTo(out);
+					System.out.println("move serialized");
+					out.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 
 			grid.addBlock(dropRow, moveColumn, moveBlock);
