@@ -37,8 +37,8 @@ public class TetrisBlock {
 		for (int r = 0; r < height; r++) {
 			for (int c = 0; c < width; c++) {
 				if (data.get(r, c)) {
-					int newRow = c;
-					int newColumn = height - r - 1;
+					int newRow = width - c - 1;
+					int newColumn = r;
 					newBits |= 1L << (height * newRow + newColumn);
 				}
 			}

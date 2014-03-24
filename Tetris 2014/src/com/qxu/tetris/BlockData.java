@@ -1,8 +1,10 @@
 package com.qxu.tetris;
+
 public class BlockData {
 	private final long data;
 	private final int height;
 	private final int width;
+	private int[] bottomPaddings;
 
 	public BlockData(int height, int width, long data) {
 		if (width < 0 || height < 0)
@@ -14,6 +16,14 @@ public class BlockData {
 		this.height = height;
 		this.width = width;
 		this.data = ((1L << bitLength) - 1L) & data;
+		this.bottomPaddings = new int[width];
+		for (int c = 0; c < width; c++) {
+			int padding = 0;
+			while (padding < height && !get(padding, c)) {
+				padding++;
+			}
+			bottomPaddings[c] = padding;
+		}
 	}
 
 	public int getWidth() {
@@ -29,10 +39,8 @@ public class BlockData {
 		return (data & (1L << row * width + column)) != 0;
 	}
 
-	public long get(int row) {
-		if (row < 0 || row >= height)
-			throw new IndexOutOfBoundsException("Row: " + row);
-		return (data >>> (row * width)) & ((1L << width) - 1L);
+	public int getBottomPadding(int column) {
+		return bottomPaddings[column];
 	}
 
 	private void checkBounds(int row, int column) {
@@ -41,12 +49,12 @@ public class BlockData {
 		if (column < 0 || column >= width)
 			throw new IndexOutOfBoundsException("Column: " + column);
 	}
-	
+
 	@Override
 	public int hashCode() {
 		int hash = height;
 		hash = hash * 31 + width;
-		hash = hash * 31 + (int)(data ^ (data >>> 32));
+		hash = hash * 31 + (int) (data ^ (data >>> 32));
 		return hash;
 	}
 

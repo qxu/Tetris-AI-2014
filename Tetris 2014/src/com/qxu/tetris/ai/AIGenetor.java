@@ -90,7 +90,7 @@ public class AIGenetor {
 
 	private double getFitness(double[] c) {
 		RaterAI ai = new RaterAI(new FinalRater(c));
-		return eval.evalN(ai, 4);
+		return eval.evalN(ai, 1, 4);
 	}
 
 	private static class ScorePair implements Comparable<ScorePair> {
