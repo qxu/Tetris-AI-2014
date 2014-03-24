@@ -2,7 +2,7 @@ package com.qxu.tetris.ai.scores;
 
 import com.qxu.tetris.TetrisGrid;
 
-public enum TroughCount implements BoardRater {
+public enum SmallTroughCount implements BoardRater {
 	INSTANCE;
 
 	@Override
@@ -12,28 +12,23 @@ public enum TroughCount implements BoardRater {
 
 		int troughCount = 0;
 
-		int leftTroughCount = (board.getColumnHeight(1)
-				- board.getColumnHeight(0) + 1) / 4;
-		if (leftTroughCount > 0)
-			troughCount += leftTroughCount;
-		
+		if (board.getColumnHeight(1) - board.getColumnHeight(0) == 2)
+			troughCount++;
+
 		for (int c = 2; c <= board.getWidth() - 2; c++) {
 			int leftHeight = board.getColumnHeight(c - 1);
 			int centerHeight = board.getColumnHeight(c);
 			int rightHeight = board.getColumnHeight(c + 1);
-			
+
 			int dLeft = leftHeight - centerHeight;
 			int dRight = rightHeight - centerHeight;
-			int min = (Math.min(dLeft, dRight) + 1) / 4;
-			
-			if (min > 0)
-				troughCount += min;
+			if (dLeft == 2 && dRight == 2)
+				troughCount++;
 		}
 
-		int rightTroughCount = (board.getColumnHeight(board.getWidth() - 2)
-				- board.getColumnHeight(board.getWidth() - 1) + 1) / 4;
-		if (rightTroughCount > 0)
-			troughCount += leftTroughCount;
+		if (board.getColumnHeight(board.getWidth() - 2)
+				- board.getColumnHeight(board.getWidth() - 1) == 2)
+			troughCount++;
 
 		return troughCount;
 	}
