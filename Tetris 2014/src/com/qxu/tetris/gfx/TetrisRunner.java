@@ -27,7 +27,7 @@ import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
 	private static String savePath = "saves.dat";
-	
+
 	private static String ssPath = "snapshot.dat";
 	private static TetrisGridSnapshot snapshot;
 	static {
@@ -44,13 +44,13 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-	private static final double[] c = { -3.728937582015992,
-			-20.019104358673093, -6.607740852355959, -3.6078561449050897,
-			-1.5987364521026617 };
+	private static final double[] c = { 0.7547293090820313,
+			-18.340888366699218, -9.092015380859374, -0.7960744018554687,
+			-1.3188953247070314 };
 
 	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
-	
+
 	private static final int seekSize = 1;
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
@@ -64,7 +64,7 @@ public class TetrisRunner implements Runnable {
 
 	private int moveColumn;
 	private TetrisBlock moveBlock;
-	
+
 	private Deque<Tetromino> next;
 
 	private Object moveLock = new Object();
@@ -155,12 +155,13 @@ public class TetrisRunner implements Runnable {
 			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
 		}
 		nextComp.setNext(new ArrayList<>(next));
-		
+
 		int score = 0;
 		while (true) {
 			Tetromino t = next.removeFirst();
 			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
-			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(next));
+			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(
+					next));
 			if (move == null)
 				break;
 
