@@ -10,9 +10,9 @@ import com.qxu.tetris.ai.scores.FinalRater;
 import com.qxu.tetris.eval.Eval;
 
 public class AIRunner {
-	private static final double[] c = { -3.728937582015992,
-			-20.019104358673093, -6.607740852355959, -3.6078561449050897,
-			-1.5987364521026617 };
+	private static final double[] c = { -4.7374263131618495,
+			-27.32919796347618, 0.8786045827865605, -0.25860236442089146,
+			-2.2918267447948453, 5.144797187566756, 1.1574416939020156 };
 
 	public static void main(String[] args) {
 		final Object buttonLock = new Object();

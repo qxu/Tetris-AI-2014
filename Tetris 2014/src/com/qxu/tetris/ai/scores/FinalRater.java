@@ -8,7 +8,9 @@ public class FinalRater implements BoardRater {
 			SimpleHoles.INSTANCE,
 			TroughCount.INSTANCE,
 			BlocksAboveHoles.INSTANCE,
-			Bumpiness.INSTANCE
+			Bumpiness.INSTANCE,
+			LargeStepDownCount.INSTANCE,
+			SmallTroughCount.INSTANCE
 	};
 	
 	private double[] coefficients;
