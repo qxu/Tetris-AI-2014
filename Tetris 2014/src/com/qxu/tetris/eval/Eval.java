@@ -1,5 +1,8 @@
 package com.qxu.tetris.eval;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.Random;
 
 import com.qxu.tetris.TetrisBlock;
@@ -21,22 +24,27 @@ public class Eval {
 		this.gridWidth = gridWidth;
 	}
 
-	public double evalN(TetrisAI ai, int n) {
+	public double evalN(TetrisAI ai, int seekSize, int n) {
 		double total = 0.0;
 		for (int i = 0; i < n; i++) {
-			int score = evalOnce(ai);
+			int score = evalOnce(ai, seekSize);
 			total += (double) score / n;
 		}
 		return total;
 	}
 
-	public int evalOnce(TetrisAI ai) {
+	public int evalOnce(TetrisAI ai, int seekSize) {
+		Deque<Tetromino> next = new ArrayDeque<>(seekSize);
+		for (int i = 0; i < seekSize; i++) {
+			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+		}
 		TetrisGrid grid = new TetrisGrid(gridHeight, gridWidth);
 
 		int score = 0;
 		while (true) {
-			Tetromino t = TETROMINOES[rand.nextInt(TETROMINOES.length)];
-			AIMove move = ai.getMove(new TetrisGrid(grid), t);
+			Tetromino t = next.removeFirst();
+			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(next));
 			if (move == null)
 				break;
 			int column = move.getColumn();

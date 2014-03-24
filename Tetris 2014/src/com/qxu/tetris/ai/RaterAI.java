@@ -15,7 +15,7 @@ public class RaterAI implements TetrisAI {
 	}
 	
 	@Override
-	public AIMove getMove(TetrisGrid grid, Tetromino t) {
+	public AIMove getMove(TetrisGrid grid, Tetromino t, List<Tetromino> next) {
 		double bestScore = Double.NEGATIVE_INFINITY;
 		
 		int bestColumn = -1;

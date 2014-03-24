@@ -51,7 +51,7 @@ public class TetrisRunner implements Runnable {
 	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
 	
-	private static final int seekSize = 4;
+	private static final int seekSize = 1;
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 
@@ -160,7 +160,7 @@ public class TetrisRunner implements Runnable {
 		while (true) {
 			Tetromino t = next.removeFirst();
 			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
-			AIMove move = ai.getMove(new TetrisGrid(grid), t);
+			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(next));
 			if (move == null)
 				break;
 
