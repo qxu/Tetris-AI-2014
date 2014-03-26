@@ -21,8 +21,13 @@ import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
 import com.qxu.tetris.ai.FinalRater;
+import com.qxu.tetris.ai.NewAI;
 import com.qxu.tetris.ai.RaterAI;
 import com.qxu.tetris.ai.TetrisAI;
+import com.qxu.tetris.ai.newscores.ColumnTransitions;
+import com.qxu.tetris.ai.newscores.Holes;
+import com.qxu.tetris.ai.newscores.RowTransitions;
+import com.qxu.tetris.ai.newscores.Wells;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
@@ -44,10 +49,6 @@ public class TetrisRunner implements Runnable {
 			}
 		}
 	}
-
-	private static final double[] c = { -3.026514926926164,
-			-33.675084628522995, -16.06204544899791, 32.40241915416981,
-			-4.977469916697346 };
 
 	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
@@ -76,7 +77,7 @@ public class TetrisRunner implements Runnable {
 	private boolean saveMove = true;
 
 	public TetrisRunner() {
-		this.ai = new RaterAI(new FinalRater(c));
+		this.ai = new NewAI();
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
 		if (snapshot != null) {
 			this.grid = snapshot.createGrid();
@@ -217,6 +218,13 @@ public class TetrisRunner implements Runnable {
 			if (!aSyncGfxUpdate) {
 				comp.repaint();
 				nextComp.repaint();
+				
+				TetrisGrid testGrid = new TetrisGrid(grid);
+				System.out.println("holes: " + Holes.getHoleCount(testGrid));
+				System.out.println("wells: " + Wells.getWellSums(testGrid));
+				System.out.println("ct: " + ColumnTransitions.getColumnTransitionCount(testGrid));
+				System.out.println("rt: " + RowTransitions.getRowTransitionCount(testGrid));
+				System.out.println();
 			}
 			while (!nextMove) {
 				Debug.waitFor(moveLock);

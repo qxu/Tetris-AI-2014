@@ -30,6 +30,7 @@ public class RaterAI implements TetrisAI {
 				if (row + block.getData().getHeight() <= grid.getHeight()) {
 					TetrisGrid subGrid1 = new TetrisGrid(grid);
 					subGrid1.addBlock(row, c, block);
+					subGrid1.clearFullRows();
 
 					for (TetrisGrid subGrid2 : iterateMoves(subGrid1, next.get(0))) {
 						double score = rater.rate(subGrid2);
@@ -124,6 +125,7 @@ public class RaterAI implements TetrisAI {
 			public TetrisGrid next() {
 				TetrisGrid next = new TetrisGrid(grid);
 				next.addBlock(dropRow, c, curBlock);
+				next.clearFullRows();
 
 				incrementVars();
 				return next;

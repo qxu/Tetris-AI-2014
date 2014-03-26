@@ -17,7 +17,7 @@ public enum TroughCount implements BoardRater {
 		if (leftTroughCount > 0)
 			troughCount += leftTroughCount;
 		
-		for (int c = 2; c <= board.getWidth() - 2; c++) {
+		for (int c = 1; c < board.getWidth() - 1; c++) {
 			int leftHeight = board.getColumnHeight(c - 1);
 			int centerHeight = board.getColumnHeight(c);
 			int rightHeight = board.getColumnHeight(c + 1);

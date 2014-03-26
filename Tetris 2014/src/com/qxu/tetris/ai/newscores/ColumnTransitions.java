@@ -3,15 +3,22 @@ package com.qxu.tetris.ai.newscores;
 import com.qxu.tetris.TetrisGrid;
 
 public class ColumnTransitions {
-	public static int getColumnTransitions(TetrisGrid grid) {
-		int nr = 0;
-		for (int j = grid.getHeight() + 1; j > 1; j--) {
-			for (int i = 1; i < grid.getWidth() + 1; i++) {
-				if (grid.get(j - 1, i) != grid.get(j, i)) {
-					nr++;
+	public static int getColumnTransitionCount(TetrisGrid grid) {
+		int count = 0;
+		for (int c = 0; c < grid.getWidth(); c++) {
+			int h = grid.getColumnHeight(c);
+			if (h > 0) {
+				count++;
+			}
+			for (int r = h - 2; r >= 0; r--) {
+				if (grid.get(r, c) != grid.get(r + 1, c)) {
+					count++;
 				}
 			}
+			if (!grid.get(0, c)) {
+				count++;
+			}
 		}
-		return nr;
+		return count;
 	}
 }
