@@ -33,7 +33,7 @@ public class Wells {
 
 		return max;
 	}
-	
+
 	public static int getWellSums(TetrisGrid grid) {
 		if (grid.getWidth() <= 1)
 			return 0;

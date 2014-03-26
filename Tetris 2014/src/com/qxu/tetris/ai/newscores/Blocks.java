@@ -3,23 +3,24 @@ package com.qxu.tetris.ai.newscores;
 import com.qxu.tetris.TetrisGrid;
 
 public class Blocks {
-	public int getNumOfBlocks(TetrisGrid grid){
+	public int getNumOfBlocks(TetrisGrid grid) {
 		int numOfBlocks = 0;
-		for(int i = 0; i < grid.getWidth(); ++i){
-			for(int r = 0; r < grid.getColumnHeight(i); ++r){
-				if(grid.get(r,i)){
+		for (int c = 0; c < grid.getWidth(); ++c) {
+			for (int r = 0; r < grid.getColumnHeight(c); ++r) {
+				if (grid.get(r, c)) {
 					++numOfBlocks;
 				}
 			}
 		}
 		return numOfBlocks;
 	}
-	public int getWeightedBlocks(TetrisGrid grid){
+
+	public int getWeightedBlocks(TetrisGrid grid) {
 		int weightedBlocks = 0;
-		for(int i = 0; i < grid.getWidth(); ++i){
-			for(int r = 0; r < grid.getColumnHeight(i); ++r){
-				if(grid.get(r,i)){
-					weightedBlocks += (r+1);
+		for (int c = 0; c < grid.getWidth(); ++c) {
+			for (int r = 0; r < grid.getColumnHeight(c); ++r) {
+				if (grid.get(r, c)) {
+					weightedBlocks += (r + 1);
 				}
 			}
 		}

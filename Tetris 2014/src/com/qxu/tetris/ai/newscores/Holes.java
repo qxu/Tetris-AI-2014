@@ -14,7 +14,7 @@ public class Holes {
 		}
 		return count;
 	}
-	
+
 	public static int getConnectedHoles(TetrisGrid grid) {
 		int count = 0;
 		for (int c = 0; c < grid.getWidth(); c++) {
