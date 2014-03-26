@@ -3,7 +3,7 @@ package com.qxu.tetris.ai.newscores;
 import com.qxu.tetris.TetrisGrid;
 
 public class RowTransitions {
-	public static int getRowTransitionCount(TetrisGrid grid) {
+	public static int getRowTransitions(TetrisGrid grid) {
 		int count = 0;
 		for (int r = grid.getHeight() - 1; r >= 0; r--) {
 			if (!grid.get(r, 0)) {
