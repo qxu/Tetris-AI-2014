@@ -29,12 +29,28 @@ public class NewAI implements TetrisAI {
 					subGrid1.addBlock(row, c, block);
 					int rowsCleared = subGrid1.clearFullRows();
 
-					double score = getScore(subGrid1, block, row, rowsCleared);
+					List<TetrisBlock> blocks2 = next.get(0).getBlockChain();
+					for (int or2 = 0; or2 < blocks2.size(); or2++) {
+						TetrisBlock block2 = blocks2.get(or2);
+						int maxCol2 = grid.getWidth()
+								- block2.getData().getWidth();
+						for (int c2 = 0; c2 <= maxCol2; c2++) {
+							int row2 = grid.getDropRow(c2, block2);
+							if (row2 + block2.getData().getHeight() <= grid
+									.getHeight()) {
+								TetrisGrid subGrid2 = new TetrisGrid(subGrid1);
+								subGrid2.addBlock(row2, c2, block2);
+								int rowsCleared2 = subGrid2.clearFullRows();
 
-					if (score > bestScore) {
-						bestScore = score;
-						bestColumn = c;
-						bestOrientation = or;
+								double score = getScore(subGrid2, block2, row2, rowsCleared + rowsCleared2);
+
+								if (score > bestScore) {
+									bestScore = score;
+									bestColumn = c;
+									bestOrientation = or;
+								}
+							}
+						}
 					}
 				}
 			}
