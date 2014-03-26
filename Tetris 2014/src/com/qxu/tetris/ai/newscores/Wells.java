@@ -3,15 +3,15 @@ package com.qxu.tetris.ai.newscores;
 import com.qxu.tetris.TetrisGrid;
 
 public class Wells {
-	public static int getWellCount(TetrisGrid grid) {
+	public static int getMaxWell(TetrisGrid grid) {
 		if (grid.getWidth() <= 1)
 			return 0;
 
-		int count = 0;
+		int max = 0;
 
-		int leftCount = grid.getColumnHeight(1) - grid.getColumnHeight(0);
-		if (leftCount > 0)
-			count += leftCount;
+		int leftWell = grid.getColumnHeight(1) - grid.getColumnHeight(0);
+		if (leftWell > max)
+			max = leftWell;
 
 		for (int c = 1; c < grid.getWidth() - 1; c++) {
 			int hLeft = grid.getColumnHeight(c - 1);
@@ -20,52 +20,52 @@ public class Wells {
 
 			int dLeft = hLeft - hCenter;
 			int dRight = hRight - hCenter;
-			int min = Math.min(dLeft, dRight);
+			int well = Math.min(dLeft, dRight);
 
-			if (min > 0)
-				count += min;
+			if (well > max)
+				max = well;
 		}
 
-		int rightCount = grid.getColumnHeight(grid.getWidth() - 2)
+		int rightWell = grid.getColumnHeight(grid.getWidth() - 2)
 				- grid.getColumnHeight(grid.getWidth() - 1);
-		if (rightCount > 0)
-			count += rightCount;
+		if (rightWell > max)
+			max = rightWell;
 
-		return count;
+		return max;
 	}
-
-	public static int getWellCount2(TetrisGrid grid) {
-		if (grid.getWidth() <= 1)
-			return 0;
-
-		int count = 0;
-
-		int leftCount = grid.getColumnHeight(1) - grid.getColumnHeight(0);
-		if (leftCount > 0)
-			count += leftCount * (leftCount + 1) / 2;
-
-		for (int c = 1; c < grid.getWidth() - 1; c++) {
-			int hLeft = grid.getColumnHeight(c - 1);
-			int hCenter = grid.getColumnHeight(c);
-			int hRight = grid.getColumnHeight(c + 1);
-
-			int dLeft = hLeft - hCenter;
-			int dRight = hRight - hCenter;
-			int min = Math.min(dLeft, dRight);
-
-			if (min > 0)
-				count += min * (min + 1) / 2;
-		}
-
-		int rightCount = grid.getColumnHeight(grid.getWidth() - 2)
-				- grid.getColumnHeight(grid.getWidth() - 1);
-		if (rightCount > 0)
-			count += rightCount * (rightCount + 1) / 2;
-
-		return count;
-	}
-
+	
 	public static int getWellSums(TetrisGrid grid) {
+		if (grid.getWidth() <= 1)
+			return 0;
+
+		int sum = 0;
+
+		int leftWell = grid.getColumnHeight(1) - grid.getColumnHeight(0);
+		if (leftWell > 0)
+			sum += leftWell;
+
+		for (int c = 1; c < grid.getWidth() - 1; c++) {
+			int hLeft = grid.getColumnHeight(c - 1);
+			int hCenter = grid.getColumnHeight(c);
+			int hRight = grid.getColumnHeight(c + 1);
+
+			int dLeft = hLeft - hCenter;
+			int dRight = hRight - hCenter;
+			int well = Math.min(dLeft, dRight);
+
+			if (well > 0)
+				sum += well;
+		}
+
+		int rightWell = grid.getColumnHeight(grid.getWidth() - 2)
+				- grid.getColumnHeight(grid.getWidth() - 1);
+		if (rightWell > 0)
+			sum += rightWell;
+
+		return sum;
+	}
+
+	public static int getWellSumsEl(TetrisGrid grid) {
 		int nr = 0;
 		for (int j = 0; j < grid.getHeight(); j++) {
 			if (!grid.get(j, 0) && grid.get(j, 1)) {
