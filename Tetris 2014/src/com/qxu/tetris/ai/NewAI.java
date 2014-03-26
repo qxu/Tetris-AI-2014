@@ -32,11 +32,11 @@ public class NewAI implements TetrisAI {
 					List<TetrisBlock> blocks2 = next.get(0).getBlockChain();
 					for (int or2 = 0; or2 < blocks2.size(); or2++) {
 						TetrisBlock block2 = blocks2.get(or2);
-						int maxCol2 = grid.getWidth()
+						int maxCol2 = subGrid1.getWidth()
 								- block2.getData().getWidth();
 						for (int c2 = 0; c2 <= maxCol2; c2++) {
-							int row2 = grid.getDropRow(c2, block2);
-							if (row2 + block2.getData().getHeight() <= grid
+							int row2 = subGrid1.getDropRow(c2, block2);
+							if (row2 + block2.getData().getHeight() <= subGrid1
 									.getHeight()) {
 								TetrisGrid subGrid2 = new TetrisGrid(subGrid1);
 								subGrid2.addBlock(row2, c2, block2);

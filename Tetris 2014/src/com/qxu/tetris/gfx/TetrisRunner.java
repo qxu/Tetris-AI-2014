@@ -6,9 +6,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Locale;
 import java.util.Random;
 
 import javax.swing.BoxLayout;
@@ -117,7 +119,7 @@ public class TetrisRunner implements Runnable {
 					}
 					return;
 				}
-				
+
 				if (moveBlock == null)
 					return;
 
@@ -179,7 +181,9 @@ public class TetrisRunner implements Runnable {
 							nextComp.setNext(new ArrayList<>(next));
 							comp.repaint();
 							nextComp.repaint();
-							scoreLabel.setText("score: " + score);
+							scoreLabel.setText("score: "
+									+ NumberFormat.getInstance(Locale.US)
+											.format(score).replace(",", " "));
 						} catch (Exception e) {
 							// ignore concurrency exception for a-sync run
 						}
@@ -232,15 +236,6 @@ public class TetrisRunner implements Runnable {
 				nextComp.setNext(new ArrayList<>(next));
 				comp.repaint();
 				nextComp.repaint();
-
-				// TetrisGrid testGrid = new TetrisGrid(grid);
-				// System.out.println("holes: " + Holes.getHoleCount(testGrid));
-				// System.out.println("wells: " + Wells.getWellSums(testGrid));
-				// System.out.println("ct: " +
-				// ColumnTransitions.getColumnTransitionCount(testGrid));
-				// System.out.println("rt: " +
-				// RowTransitions.getRowTransitionCount(testGrid));
-				// System.out.println();
 			}
 			while (!nextMove) {
 				Debug.waitFor(moveLock);
@@ -270,7 +265,7 @@ public class TetrisRunner implements Runnable {
 			if (!aSyncGfxUpdate) {
 				nextMove = false;
 				saveMove = true;
-				
+
 				comp.setMoveBlock(null, 0, 0);
 				comp.repaint();
 			}
@@ -280,7 +275,9 @@ public class TetrisRunner implements Runnable {
 				score += rowsCleared;
 
 				if (!aSyncGfxUpdate) {
-					scoreLabel.setText("score: " + score);
+					scoreLabel.setText("score: "
+							+ NumberFormat.getInstance(Locale.US).format(score)
+									.replace(",", " "));
 					comp.repaint();
 					Debug.sleep(50);
 				}
