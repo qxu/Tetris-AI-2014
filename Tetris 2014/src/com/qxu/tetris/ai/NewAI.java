@@ -54,7 +54,7 @@ public class NewAI implements TetrisAI {
 		int re = rowsCleared;
 		int rt = RowTransitions.getRowTransitionCount(grid);
 		int ct = ColumnTransitions.getColumnTransitionCount(grid);
-		int ho = Holes.getHoleCount(grid);
+		int ho = Holes.getHoles(grid);
 		int ws = Wells.getWellSums(grid);
 		return w[0] * lh + w[1] * re + w[2] * rt + w[3] * ct + w[4] * ho + w[5]
 				* ws;
