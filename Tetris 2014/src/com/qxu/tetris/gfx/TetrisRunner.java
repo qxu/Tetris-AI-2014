@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.Random;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.qxu.tetris.BlockData;
@@ -20,14 +22,8 @@ import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
-import com.qxu.tetris.ai.FinalRater;
 import com.qxu.tetris.ai.NewAI;
-import com.qxu.tetris.ai.RaterAI;
 import com.qxu.tetris.ai.TetrisAI;
-import com.qxu.tetris.ai.newscores.ColumnTransitions;
-import com.qxu.tetris.ai.newscores.Holes;
-import com.qxu.tetris.ai.newscores.RowTransitions;
-import com.qxu.tetris.ai.newscores.Wells;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
@@ -65,9 +61,11 @@ public class TetrisRunner implements Runnable {
 	private TetrisGrid grid;
 	private TetrisGridJComponent comp;
 	private TetrominoNextJComponent nextComp;
+	private JLabel scoreLabel;
 
 	private int moveColumn;
 	private TetrisBlock moveBlock;
+	private int dropRow;
 
 	private Deque<Tetromino> next;
 
@@ -75,6 +73,8 @@ public class TetrisRunner implements Runnable {
 	private boolean nextMove = false;
 
 	private boolean saveMove = true;
+
+	private int score;
 
 	public TetrisRunner() {
 		this.ai = new NewAI();
@@ -85,12 +85,18 @@ public class TetrisRunner implements Runnable {
 
 		this.comp = new TetrisGridJComponent(grid);
 		this.nextComp = new TetrominoNextJComponent(seekSize);
+		this.scoreLabel = new JLabel("score: ");
 
 		JFrame frame = new JFrame("Tetris");
-		JPanel panel = new JPanel();
-		panel.add(comp);
-		panel.add(nextComp);
-		frame.setContentPane(panel);
+		JPanel contentPanel = new JPanel();
+		contentPanel
+				.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
+		JPanel drawPanel = new JPanel();
+		drawPanel.add(comp);
+		drawPanel.add(nextComp);
+		contentPanel.add(drawPanel);
+		contentPanel.add(scoreLabel);
+		frame.setContentPane(contentPanel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -99,17 +105,19 @@ public class TetrisRunner implements Runnable {
 		comp.setFocusable(true);
 		comp.addKeyListener(new KeyAdapter() {
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void keyPressed(KeyEvent e) {
 				if (aSyncGfxUpdate) {
 					if (e.getKeyCode() == KeyEvent.VK_DOWN
-							|| e.getKeyCode() == KeyEvent.VK_ENTER) {
-						nextMove = false;
+							|| e.getKeyCode() == KeyEvent.VK_ENTER
+							|| e.getKeyCode() == KeyEvent.VK_SPACE) {
+						nextMove = !nextMove;
+						if (nextMove) {
+							Debug.notifyAll(moveLock);
+						}
 					}
+					return;
 				}
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
+				
 				if (moveBlock == null)
 					return;
 
@@ -166,8 +174,15 @@ public class TetrisRunner implements Runnable {
 				@Override
 				public void run() {
 					while (true) {
-						comp.repaint();
-						nextComp.repaint();
+						try {
+							comp.setMoveBlock(moveBlock, dropRow, moveColumn);
+							nextComp.setNext(new ArrayList<>(next));
+							comp.repaint();
+							nextComp.repaint();
+							scoreLabel.setText("score: " + score);
+						} catch (Exception e) {
+							// ignore concurrency exception for a-sync run
+						}
 						try {
 							Thread.sleep(20);
 						} catch (InterruptedException e) {
@@ -186,9 +201,8 @@ public class TetrisRunner implements Runnable {
 		for (int i = 0; i < seekSize; i++) {
 			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
 		}
-		nextComp.setNext(new ArrayList<>(next));
 
-		int score = 0;
+		score = 0;
 		while (true) {
 			Tetromino t = next.removeFirst();
 			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
@@ -200,7 +214,7 @@ public class TetrisRunner implements Runnable {
 			moveColumn = move.getColumn();
 			moveBlock = t.getBlockChain().get(move.getOrientation());
 
-			int dropRow = grid.getDropRow(moveColumn, moveBlock);
+			dropRow = grid.getDropRow(moveColumn, moveBlock);
 			if (dropRow >= grid.getHeight())
 				break;
 
@@ -213,24 +227,26 @@ public class TetrisRunner implements Runnable {
 				snapshot = null;
 			}
 
-			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
-			nextComp.setNext(new ArrayList<>(next));
 			if (!aSyncGfxUpdate) {
+				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
+				nextComp.setNext(new ArrayList<>(next));
 				comp.repaint();
 				nextComp.repaint();
-				
-//				TetrisGrid testGrid = new TetrisGrid(grid);
-//				System.out.println("holes: " + Holes.getHoleCount(testGrid));
-//				System.out.println("wells: " + Wells.getWellSums(testGrid));
-//				System.out.println("ct: " + ColumnTransitions.getColumnTransitionCount(testGrid));
-//				System.out.println("rt: " + RowTransitions.getRowTransitionCount(testGrid));
-//				System.out.println();
+
+				// TetrisGrid testGrid = new TetrisGrid(grid);
+				// System.out.println("holes: " + Holes.getHoleCount(testGrid));
+				// System.out.println("wells: " + Wells.getWellSums(testGrid));
+				// System.out.println("ct: " +
+				// ColumnTransitions.getColumnTransitionCount(testGrid));
+				// System.out.println("rt: " +
+				// RowTransitions.getRowTransitionCount(testGrid));
+				// System.out.println();
 			}
 			while (!nextMove) {
 				Debug.waitFor(moveLock);
 				dropRow = grid.getDropRow(moveColumn, moveBlock);
-				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 				if (!aSyncGfxUpdate) {
+					comp.setMoveBlock(moveBlock, dropRow, moveColumn);
 					comp.repaint();
 				}
 			}
@@ -239,7 +255,8 @@ public class TetrisRunner implements Runnable {
 				File f = new File(savePath);
 				try {
 					FileOutputStream out = new FileOutputStream(f, true);
-					TetrisGridSnapshot ss = new TetrisGridSnapshot(grid, moveBlock, dropRow, null);
+					TetrisGridSnapshot ss = new TetrisGridSnapshot(grid,
+							moveBlock, dropRow, null);
 					ss.writeTo(out);
 					System.out.println("move serialized");
 					out.close();
@@ -253,10 +270,8 @@ public class TetrisRunner implements Runnable {
 			if (!aSyncGfxUpdate) {
 				nextMove = false;
 				saveMove = true;
-			}
-
-			comp.setMoveBlock(null, 0, 0);
-			if (!aSyncGfxUpdate) {
+				
+				comp.setMoveBlock(null, 0, 0);
 				comp.repaint();
 			}
 
@@ -264,15 +279,13 @@ public class TetrisRunner implements Runnable {
 			if (rowsCleared > 0) {
 				score += rowsCleared;
 
-				System.out.println("score: " + score);
 				if (!aSyncGfxUpdate) {
+					scoreLabel.setText("score: " + score);
 					comp.repaint();
 					Debug.sleep(50);
 				}
 			}
 		}
-
-		System.out.println("score: " + score);
 	}
 
 	public static void main(String[] args) {

@@ -51,9 +51,13 @@ public class TetrominoNextJComponent extends JComponent {
 	
 	@Override
 	protected void paintComponent(Graphics g) {
+		if (next == null)
+			return;
+		
 		int totalLength = cellSize + borderSize;
 		
-		for (int i = 0; i < nextSize; i++) {
+		int minSize = Math.min(nextSize, next.size());
+		for (int i = 0; i < minSize; i++) {
 			int yOff = (5 * totalLength) * i;
 			int componentWidth = 4 * totalLength + borderSize;
 			int componentHeight = 4 * totalLength + borderSize;

@@ -21,8 +21,6 @@ public class TetrisGridJComponent extends JComponent {
 	private static final Color moveCellColor = Color.CYAN;
 	private static final Color borderColor = Color.BLACK;
 
-	
-	
 	private TetrisGrid grid;
 
 	private TetrisBlock moveBlock;
