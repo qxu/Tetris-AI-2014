@@ -219,12 +219,12 @@ public class TetrisRunner implements Runnable {
 				comp.repaint();
 				nextComp.repaint();
 				
-				TetrisGrid testGrid = new TetrisGrid(grid);
-				System.out.println("holes: " + Holes.getHoleCount(testGrid));
-				System.out.println("wells: " + Wells.getWellSums(testGrid));
-				System.out.println("ct: " + ColumnTransitions.getColumnTransitionCount(testGrid));
-				System.out.println("rt: " + RowTransitions.getRowTransitionCount(testGrid));
-				System.out.println();
+//				TetrisGrid testGrid = new TetrisGrid(grid);
+//				System.out.println("holes: " + Holes.getHoleCount(testGrid));
+//				System.out.println("wells: " + Wells.getWellSums(testGrid));
+//				System.out.println("ct: " + ColumnTransitions.getColumnTransitionCount(testGrid));
+//				System.out.println("rt: " + RowTransitions.getRowTransitionCount(testGrid));
+//				System.out.println();
 			}
 			while (!nextMove) {
 				Debug.waitFor(moveLock);
