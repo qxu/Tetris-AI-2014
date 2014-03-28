@@ -24,17 +24,18 @@ public class RaterAI implements TetrisAI {
 		List<TetrisBlock> blocks = t.getBlockChain();
 		for (int or = 0; or < blocks.size(); or++) {
 			TetrisBlock block = blocks.get(or);
-			int maxCol = grid.getWidth() - block.getData().getWidth();
+			int maxCol = grid.getWidth() - block.getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row + block.getData().getHeight() <= grid.getHeight()) {
+				if (row + block.getHeight() <= grid.getHeight()) {
 					TetrisGrid subGrid1 = new TetrisGrid(grid);
 					subGrid1.addBlock(row, c, block);
 					subGrid1.clearFullRows();
 
-					for (TetrisGrid subGrid2 : iterateMoves(subGrid1, next.get(0))) {
+					for (TetrisGrid subGrid2 : iterateMoves(subGrid1,
+							next.get(0))) {
 						double score = rater.rate(subGrid2);
-						
+
 						if (score > bestScore) {
 							bestScore = score;
 							bestOrientation = or;
@@ -49,7 +50,8 @@ public class RaterAI implements TetrisAI {
 				: null;
 	}
 
-	private static Iterable<TetrisGrid> iterateMoves(TetrisGrid grid, Tetromino t) {
+	private static Iterable<TetrisGrid> iterateMoves(TetrisGrid grid,
+			Tetromino t) {
 		return new MoveIterable(grid, t);
 	}
 
@@ -76,12 +78,10 @@ public class RaterAI implements TetrisAI {
 			MoveIterator() {
 				this.curBlock = firstBlock;
 				do {
-					this.maxCol = grid.getWidth()
-							- curBlock.getData().getWidth();
+					this.maxCol = grid.getWidth() - curBlock.getWidth();
 					for (this.c = 0; c <= maxCol; this.c++) {
 						this.dropRow = grid.getDropRow(c, curBlock);
-						if (dropRow + curBlock.getData().getHeight() <= grid
-								.getHeight()) {
+						if (dropRow + curBlock.getHeight() <= grid.getHeight()) {
 							return;
 						}
 					}
@@ -94,20 +94,17 @@ public class RaterAI implements TetrisAI {
 				this.c++;
 				while (c <= maxCol) {
 					this.dropRow = grid.getDropRow(c, curBlock);
-					if (dropRow + curBlock.getData().getHeight() <= grid
-							.getHeight())
+					if (dropRow + curBlock.getHeight() <= grid.getHeight())
 						return;
 					this.c++;
 				}
 				this.curBlock = curBlock.getNextRotation();
 				while (!curBlock.equals(firstBlock)) {
 					this.c = 0;
-					this.maxCol = grid.getWidth()
-							- curBlock.getData().getWidth();
+					this.maxCol = grid.getWidth() - curBlock.getWidth();
 					while (c <= maxCol) {
 						this.dropRow = grid.getDropRow(c, curBlock);
-						if (dropRow + curBlock.getData().getHeight() <= grid
-								.getHeight())
+						if (dropRow + curBlock.getHeight() <= grid.getHeight())
 							return;
 						this.c++;
 					}

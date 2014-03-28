@@ -18,7 +18,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import com.qxu.tetris.BlockData;
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
@@ -48,10 +47,10 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-	private static final int gridHeight = 20;
+	private static final int gridHeight = 10;
 	private static final int gridWidth = 10;
 
-	private static final int seekSize = 1;
+	private static final int seekSize = 2;
 
 	private static final boolean aSyncGfxUpdate = true;
 
@@ -128,15 +127,13 @@ public class TetrisRunner implements Runnable {
 						moveColumn--;
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-					BlockData data = moveBlock.getData();
-					if (moveColumn + data.getWidth() < grid.getWidth()) {
+					if (moveColumn + moveBlock.getWidth() < grid.getWidth()) {
 						moveColumn++;
 					}
 				} else if (e.getKeyCode() == KeyEvent.VK_UP) {
 					moveBlock = moveBlock.getNextRotation();
-					BlockData data = moveBlock.getData();
-					if (moveColumn > grid.getWidth() - data.getWidth()) {
-						moveColumn = grid.getWidth() - data.getWidth();
+					if (moveColumn > grid.getWidth() - moveBlock.getWidth()) {
+						moveColumn = grid.getWidth() - moveBlock.getWidth();
 					}
 					if (moveColumn < 0) {
 						moveColumn = 0;
@@ -208,8 +205,13 @@ public class TetrisRunner implements Runnable {
 
 		score = 0;
 		while (true) {
-			Tetromino t = next.removeFirst();
-			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+			Tetromino t;
+			if (seekSize > 0) {
+				t = next.removeFirst();
+				next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+			} else {
+				t = TETROMINOES[rand.nextInt(TETROMINOES.length)];
+			}
 			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(
 					next));
 			if (move == null)

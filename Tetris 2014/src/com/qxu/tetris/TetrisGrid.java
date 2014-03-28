@@ -33,12 +33,11 @@ public class TetrisGrid {
 	}
 
 	public int getDropRow(int column, TetrisBlock block) {
-		BlockData data = block.getData();
-		int blockWidth = data.getWidth();
+		int blockWidth = block.getWidth();
 
 		int dropRow = 0;
 		for (int x = 0; x < blockWidth; x++) {
-			int blockPadding = data.getBottomPadding(x);
+			int blockPadding = block.getBottomPadding(x);
 			int row = getColumnHeight(x + column) - blockPadding;
 			if (row > dropRow) {
 				dropRow = row;
@@ -48,9 +47,8 @@ public class TetrisGrid {
 	}
 
 	public boolean isValidMove(int row, int column, TetrisBlock block) {
-		BlockData data = block.getData();
-		int blockWidth = data.getWidth();
-		int blockHeight = data.getHeight();
+		int blockWidth = block.getWidth();
+		int blockHeight = block.getHeight();
 		if (row < 0 || row + blockHeight > height || column < 0
 				|| column + blockWidth > width) {
 			return false;
@@ -58,7 +56,7 @@ public class TetrisGrid {
 		boolean hasBase = false;
 		for (int x = 0; x < blockWidth; x++) {
 			int colHeight = getColumnHeight(column + x);
-			int blockPadding = data.getBottomPadding(x);
+			int blockPadding = block.getBottomPadding(x);
 
 			if (blockPadding + colHeight + row < 0) {
 				return false;
@@ -76,15 +74,14 @@ public class TetrisGrid {
 	}
 
 	public void addBlock(int row, int column, TetrisBlock block) {
-		BlockData data = block.getData();
-		int blockWidth = data.getWidth();
-		int blockHeight = data.getHeight();
+		int blockWidth = block.getWidth();
+		int blockHeight = block.getHeight();
 		checkBounds(row, column);
 		checkBounds(row + blockHeight - 1, column + blockWidth - 1);
 
 		for (int x = 0; x < blockWidth; x++) {
 			for (int y = 0; y < blockHeight; y++) {
-				if (data.get(y, x)) {
+				if (block.get(y, x)) {
 					internalSet(row + y, column + x);
 				}
 			}

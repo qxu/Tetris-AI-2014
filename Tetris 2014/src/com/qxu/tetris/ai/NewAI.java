@@ -21,10 +21,10 @@ public class NewAI implements TetrisAI {
 		List<TetrisBlock> blocks = t.getBlockChain();
 		for (int or = 0; or < blocks.size(); or++) {
 			TetrisBlock block = blocks.get(or);
-			int maxCol = grid.getWidth() - block.getData().getWidth();
+			int maxCol = grid.getWidth() - block.getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row + block.getData().getHeight() <= grid.getHeight()) {
+				if (row + block.getHeight() <= grid.getHeight()) {
 					TetrisGrid subGrid = new TetrisGrid(grid);
 					subGrid.addBlock(row, c, block);
 					int rowsCleared = subGrid.clearFullRows();
@@ -34,10 +34,10 @@ public class NewAI implements TetrisAI {
 						for (int or2 = 0; or2 < blocks2.size(); or2++) {
 							TetrisBlock block2 = blocks2.get(or2);
 							int maxCol2 = subGrid.getWidth()
-									- block2.getData().getWidth();
+									- block2.getWidth();
 							for (int c2 = 0; c2 <= maxCol2; c2++) {
 								int row2 = subGrid.getDropRow(c2, block2);
-								if (row2 + block2.getData().getHeight() <= subGrid
+								if (row2 + block2.getHeight() <= subGrid
 										.getHeight()) {
 									TetrisGrid subGrid2 = new TetrisGrid(
 											subGrid);
@@ -79,7 +79,7 @@ public class NewAI implements TetrisAI {
 
 	private static double getScore(TetrisGrid grid, TetrisBlock block,
 			int moveHeight, int rowsCleared) {
-		double lh = moveHeight + (block.getData().getHeight() - 1) / 2.0;
+		double lh = moveHeight + (block.getHeight() - 1) / 2.0;
 		int re = rowsCleared;
 		int rt = RowTransitions.getRowTransitions(grid);
 		int ct = ColumnTransitions.getColumnTransitions(grid);

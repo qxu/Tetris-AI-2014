@@ -6,7 +6,6 @@ import java.awt.Graphics;
 
 import javax.swing.JComponent;
 
-import com.qxu.tetris.BlockData;
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 
@@ -83,12 +82,11 @@ public class TetrisGridJComponent extends JComponent {
 
 		if (moveBlock != null) {
 			g.setColor(moveCellColor);
-			BlockData data = moveBlock.getData();
-			int blockWidth = data.getWidth();
-			int blockHeight = data.getHeight();
+			int blockWidth = moveBlock.getWidth();
+			int blockHeight = moveBlock.getHeight();
 			for (int c = 0; c < blockWidth; c++) {
 				for (int r = 0; r < blockHeight; r++) {
-					if (data.get(r, c)) {
+					if (moveBlock.get(r, c)) {
 						int x = (moveColumn + c) * totalLength + borderSize;
 						int y = (gridHeight - (moveRow + r) - 1) * totalLength
 								+ borderSize;

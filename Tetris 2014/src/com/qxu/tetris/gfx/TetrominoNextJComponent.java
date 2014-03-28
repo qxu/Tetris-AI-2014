@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.swing.JComponent;
 
-import com.qxu.tetris.BlockData;
+import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.Tetromino;
 
 @SuppressWarnings("serial")
@@ -67,11 +67,11 @@ public class TetrominoNextJComponent extends JComponent {
 			Tetromino t = next.get(i);
 			if (t == null)
 				break;
-			BlockData data = t.getFirstRotation().getData();
+			TetrisBlock block = t.getFirstRotation();
 			g.setColor(filledCellColor);
-			for (int c = 0; c < data.getWidth(); c++) {
-				for (int r = 0; r < data.getHeight(); r++) {
-					if (data.get(r, c)) {
+			for (int c = 0; c < block.getWidth(); c++) {
+				for (int r = 0; r < block.getHeight(); r++) {
+					if (block.get(r, c)) {
 						int x = c * totalLength + borderSize;
 						int y = (4 - r - 1) * totalLength + borderSize;
 						g.fillRect(x, yOff + y, cellSize, cellSize);

@@ -11,12 +11,11 @@ public enum Tetromino {
 	S(2, 3, 0x33),
 	Z(2, 3, 0x1e);
 
-	private List<TetrisBlock> blockChain;
+	private final List<TetrisBlock> blockChain;
 
 	private Tetromino(int height, int width, long data) {
-		BlockData baseData = new BlockData(height, width, data);
-		List<TetrisBlock> chain = TetrisBlock.constructBlockChain(baseData);
-		this.blockChain = Collections.unmodifiableList(chain);
+		List<TetrisBlock> c = TetrisBlock.constructBlockChain(height, width, data);
+		this.blockChain = Collections.unmodifiableList(c);
 	}
 
 	public List<TetrisBlock> getBlockChain() {
