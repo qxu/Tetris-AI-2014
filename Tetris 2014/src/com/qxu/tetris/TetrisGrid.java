@@ -84,7 +84,7 @@ public class TetrisGrid {
 			data[row + y] |= rowData << column;
 		}
 		for (int x = 0; x < blockWidth; x++) {
-			int maxHeight = Math.max(heights[x] + 1, row + blockHeight + 1);
+			int maxHeight = Math.max(heights[x], row + blockHeight);
 			updateHeights(column + x, maxHeight);
 		}
 	}
