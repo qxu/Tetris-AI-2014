@@ -21,7 +21,7 @@ import com.qxu.tetris.ai.newscores.Wells;
 public class Hatetris {
 	private static TetrisGridJComponent comp;
 	private static JLabel scoreLabel;
-	private static double score;
+	private static int score;
 
 	private static void initComp(TetrisGrid grid) {
 		comp = new TetrisGridJComponent(grid);
@@ -73,9 +73,13 @@ public class Hatetris {
 		while (true) {
 			Tetromino next = worstPiece(grid);
 			
-			AIMove move = searchMove(grid, next, 4);
+			AIMove move = searchMove(grid, next, 2);
 			
 			int moveColumn = move.getColumn();
+			if (moveColumn < 0) {
+				break;
+			}
+			
 			TetrisBlock moveBlock = next.getBlockChain().get(move.getOrientation());
 			int dropRow = grid.getDropRow(moveColumn, moveBlock);
 			
@@ -89,10 +93,10 @@ public class Hatetris {
 			}
 			
 			grid.addBlock(dropRow, moveColumn, moveBlock);
-			grid.clearFullRows();
+			score += grid.clearFullRows();
 			comp.setMoveBlock(null, 0, 0);
 		}
-		
+		System.out.println("score: " + score);
 	}
 
 	private static final double[] w = new double[] { -4.500158825082766,
