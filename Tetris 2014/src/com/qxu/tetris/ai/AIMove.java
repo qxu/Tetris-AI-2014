@@ -16,4 +16,9 @@ public class AIMove {
 	public int getOrientation() {
 		return orientation;
 	}
+	
+	@Override
+	public String toString() {
+		return "c: " + column + ", or: " + orientation;
+	}
 }

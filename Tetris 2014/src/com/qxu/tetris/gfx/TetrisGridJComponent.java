@@ -46,6 +46,10 @@ public class TetrisGridJComponent extends JComponent {
 		height += borderSize;
 		return new Dimension(width, height);
 	}
+	
+	public void setGrid(TetrisGrid grid) {
+		this.grid = grid;
+	}
 
 	public void setMoveBlock(TetrisBlock block, int r, int c) {
 		this.moveBlock = block;
