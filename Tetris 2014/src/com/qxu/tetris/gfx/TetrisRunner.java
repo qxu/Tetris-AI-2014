@@ -47,18 +47,19 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-	private static final int gridHeight = 10;
+	private static final int gridHeight = 20;
 	private static final int gridWidth = 10;
 
-	private static final int seekSize = 2;
+	private static final int seekSize = 1;
 
 	private static final boolean aSyncGfxUpdate = true;
+	
+	private static final TetrisAI ai = new NewAI();
 
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 
 	private static final Random rand = new Random();
 
-	private TetrisAI ai;
 	private TetrisGrid grid;
 	private TetrisGridJComponent comp;
 	private TetrominoNextJComponent nextComp;
@@ -78,7 +79,6 @@ public class TetrisRunner implements Runnable {
 	private int score;
 
 	public TetrisRunner() {
-		this.ai = new NewAI();
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
 		if (snapshot != null) {
 			this.grid = snapshot.createGrid();
@@ -262,7 +262,8 @@ public class TetrisRunner implements Runnable {
 				}
 			}
 
-			grid.addBlock(dropRow, moveColumn, moveBlock);
+			int rowsCleared = grid.addAndClearRows(dropRow, moveColumn, moveBlock);
+			
 			moveBlock = null;
 			if (!aSyncGfxUpdate) {
 				nextMove = false;
@@ -272,7 +273,6 @@ public class TetrisRunner implements Runnable {
 				comp.repaint();
 			}
 
-			int rowsCleared = grid.clearFullRows();
 			if (rowsCleared > 0) {
 				score += rowsCleared;
 
@@ -280,8 +280,6 @@ public class TetrisRunner implements Runnable {
 					scoreLabel.setText("score: "
 							+ NumberFormat.getInstance(Locale.US).format(score)
 									.replace(",", " "));
-					comp.repaint();
-					Debug.sleep(50);
 				}
 			}
 		}

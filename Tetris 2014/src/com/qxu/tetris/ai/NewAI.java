@@ -24,46 +24,43 @@ public class NewAI implements TetrisAI {
 			int maxCol = grid.getWidth() - block.getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row + block.getHeight() <= grid.getHeight()) {
-					TetrisGrid subGrid = new TetrisGrid(grid);
-					subGrid.addBlock(row, c, block);
-					int rowsCleared = subGrid.clearFullRows();
+				if (row + block.getHeight() > grid.getHeight()) {
+					continue;
+				}
+				TetrisGrid subGrid = new TetrisGrid(grid);
+				int rowsCleared = subGrid.addAndClearRows(row, c, block);
 
-					if (next.size() > 0) {
-						List<TetrisBlock> blocks2 = next.get(0).getBlockChain();
-						for (int or2 = 0; or2 < blocks2.size(); or2++) {
-							TetrisBlock block2 = blocks2.get(or2);
-							int maxCol2 = subGrid.getWidth()
-									- block2.getWidth();
-							for (int c2 = 0; c2 <= maxCol2; c2++) {
-								int row2 = subGrid.getDropRow(c2, block2);
-								if (row2 + block2.getHeight() <= subGrid
-										.getHeight()) {
-									TetrisGrid subGrid2 = new TetrisGrid(
-											subGrid);
-									subGrid2.addBlock(row2, c2, block2);
-									int rowsCleared2 = subGrid2.clearFullRows();
+				if (next.size() > 0) {
+					List<TetrisBlock> blocks2 = next.get(0).getBlockChain();
+					for (int or2 = 0; or2 < blocks2.size(); or2++) {
+						TetrisBlock block2 = blocks2.get(or2);
+						int maxCol2 = subGrid.getWidth() - block2.getWidth();
+						for (int c2 = 0; c2 <= maxCol2; c2++) {
+							int row2 = subGrid.getDropRow(c2, block2);
+							if (row2 + block2.getHeight() > subGrid.getHeight()) {
+								continue;
+							}
+							TetrisGrid subGrid2 = new TetrisGrid(subGrid);
+							int rowsCleared2 = subGrid2.addAndClearRows(row2,
+									c2, block2);
 
-									double score = getScore(subGrid2, block2,
-											row2, rowsCleared + rowsCleared2);
+							double score = getScore(subGrid2, block2, row2,
+									rowsCleared + rowsCleared2);
 
-									if (score > bestScore) {
-										bestScore = score;
-										bestColumn = c;
-										bestOrientation = or;
-									}
-								}
+							if (score > bestScore) {
+								bestScore = score;
+								bestColumn = c;
+								bestOrientation = or;
 							}
 						}
-					} else {
-						double score = getScore(subGrid, block, row,
-								rowsCleared);
+					}
+				} else {
+					double score = getScore(subGrid, block, row, rowsCleared);
 
-						if (score > bestScore) {
-							bestScore = score;
-							bestColumn = c;
-							bestOrientation = or;
-						}
+					if (score > bestScore) {
+						bestScore = score;
+						bestColumn = c;
+						bestOrientation = or;
 					}
 				}
 			}

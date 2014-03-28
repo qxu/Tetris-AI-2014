@@ -79,12 +79,11 @@ public class TetrisGrid {
 		checkBounds(row, column);
 		checkBounds(row + blockHeight - 1, column + blockWidth - 1);
 
+		for (int y = 0; y < blockHeight; y++) {
+			long rowData = block.getRowData(y);
+			data[row + y] |= rowData << column;
+		}
 		for (int x = 0; x < blockWidth; x++) {
-			for (int y = 0; y < blockHeight; y++) {
-				if (block.get(y, x)) {
-					internalSet(row + y, column + x);
-				}
-			}
 			updateHeights(column + x);
 		}
 	}
@@ -94,6 +93,40 @@ public class TetrisGrid {
 		int clearedCount = 0;
 		int r = 0;
 		while (r + clearedCount < height) {
+			if (data[r] == fullRow) {
+				System.arraycopy(data, r + 1, data, r, data.length - r - 1);
+				data[data.length - 1] = 0L;
+				clearedCount++;
+			} else {
+				r++;
+			}
+		}
+		if (clearedCount > 0) {
+			for (int c = 0; c < width; c++) {
+				updateHeights(c);
+			}
+		}
+		return clearedCount;
+	}
+	
+	public int addAndClearRows(int row, int column, TetrisBlock block) {
+		int blockWidth = block.getWidth();
+		int blockHeight = block.getHeight();
+		checkBounds(row, column);
+		checkBounds(row + blockHeight - 1, column + blockWidth - 1);
+
+		for (int y = 0; y < blockHeight; y++) {
+			long rowData = block.getRowData(y);
+			data[row + y] |= rowData << column;
+		}
+		for (int x = 0; x < blockWidth; x++) {
+			updateHeights(column + x);
+		}
+
+		final long fullRow = (1L << width) - 1L;
+		int clearedCount = 0;
+		int r = row;
+		while (r + clearedCount < row + blockHeight) {
 			if (data[r] == fullRow) {
 				System.arraycopy(data, r + 1, data, r, data.length - r - 1);
 				data[data.length - 1] = 0L;
@@ -126,10 +159,6 @@ public class TetrisGrid {
 	
 	public long[] getData() {
 		return data.clone();
-	}
-	
-	private void internalSet(int row, int column) {
-		data[row] |= 1L << column;
 	}
 
 	public void clear(int row, int column) {

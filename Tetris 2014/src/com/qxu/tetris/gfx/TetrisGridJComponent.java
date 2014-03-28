@@ -46,18 +46,18 @@ public class TetrisGridJComponent extends JComponent {
 		return new Dimension(width, height);
 	}
 	
-	public void setGrid(TetrisGrid grid) {
+	public synchronized void setGrid(TetrisGrid grid) {
 		this.grid = grid;
 	}
 
-	public void setMoveBlock(TetrisBlock block, int r, int c) {
+	public synchronized void setMoveBlock(TetrisBlock block, int r, int c) {
 		this.moveBlock = block;
 		this.moveRow = r;
 		this.moveColumn = c;
 	}
 
 	@Override
-	protected void paintComponent(Graphics g) {
+	protected synchronized void paintComponent(Graphics g) {
 		int totalLength = cellSize + borderSize;
 		int gridWidth = grid.getWidth();
 		int gridHeight = grid.getHeight();

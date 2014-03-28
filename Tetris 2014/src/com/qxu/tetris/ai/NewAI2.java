@@ -24,18 +24,19 @@ public class NewAI2 implements TetrisAI {
 			int maxCol = grid.getWidth() - block.getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row + block.getHeight() <= grid.getHeight()) {
-					TetrisGrid subGrid1 = new TetrisGrid(grid);
-					subGrid1.addBlock(row, c, block);
-					int rowsCleared = subGrid1.clearFullRows();
+				if (row + block.getHeight() > grid.getHeight()) {
+					continue;
+				}
+				TetrisGrid subGrid1 = new TetrisGrid(grid);
+				subGrid1.addBlock(row, c, block);
+				int rowsCleared = subGrid1.clearFullRows();
 
-					double score = getScore(subGrid1, block, row, rowsCleared);
+				double score = getScore(subGrid1, block, row, rowsCleared);
 
-					if (score > bestScore) {
-						bestScore = score;
-						bestColumn = c;
-						bestOrientation = or;
-					}
+				if (score > bestScore) {
+					bestScore = score;
+					bestColumn = c;
+					bestOrientation = or;
 				}
 			}
 		}

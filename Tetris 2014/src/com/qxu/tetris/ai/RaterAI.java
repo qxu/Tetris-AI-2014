@@ -27,20 +27,20 @@ public class RaterAI implements TetrisAI {
 			int maxCol = grid.getWidth() - block.getWidth();
 			for (int c = 0; c <= maxCol; c++) {
 				int row = grid.getDropRow(c, block);
-				if (row + block.getHeight() <= grid.getHeight()) {
-					TetrisGrid subGrid1 = new TetrisGrid(grid);
-					subGrid1.addBlock(row, c, block);
-					subGrid1.clearFullRows();
+				if (row + block.getHeight() > grid.getHeight()) {
+					continue;
+				}
+				TetrisGrid subGrid1 = new TetrisGrid(grid);
+				subGrid1.addBlock(row, c, block);
+				subGrid1.clearFullRows();
 
-					for (TetrisGrid subGrid2 : iterateMoves(subGrid1,
-							next.get(0))) {
-						double score = rater.rate(subGrid2);
+				for (TetrisGrid subGrid2 : iterateMoves(subGrid1, next.get(0))) {
+					double score = rater.rate(subGrid2);
 
-						if (score > bestScore) {
-							bestScore = score;
-							bestOrientation = or;
-							bestColumn = c;
-						}
+					if (score > bestScore) {
+						bestScore = score;
+						bestOrientation = or;
+						bestColumn = c;
 					}
 				}
 			}

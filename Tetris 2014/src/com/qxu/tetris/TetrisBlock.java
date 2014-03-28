@@ -1,10 +1,12 @@
 package com.qxu.tetris;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class TetrisBlock {
-	
-	public static List<TetrisBlock> constructBlockChain(int baseHeight, int baseWidth, long baseData) {
+
+	public static List<TetrisBlock> constructBlockChain(int baseHeight,
+			int baseWidth, long baseData) {
 		List<TetrisBlock> blockChain = new ArrayList<>(4);
 		TetrisBlock baseBlock = new TetrisBlock(baseHeight, baseWidth, baseData);
 		blockChain.add(baseBlock);
@@ -15,14 +17,14 @@ public class TetrisBlock {
 			block.prevRotation = prevBlock;
 			prevBlock.nextRotation = block;
 			blockChain.add(block);
-			
+
 			prevBlock = block;
 			block = getRotationRight(block);
 		}
-		
+
 		baseBlock.prevRotation = prevBlock;
 		prevBlock.nextRotation = baseBlock;
-		
+
 		return blockChain;
 	}
 
@@ -45,7 +47,7 @@ public class TetrisBlock {
 	private final long data;
 	private final int height;
 	private final int width;
-	private int[] bottomPaddings;
+	private final int[] bottomPaddings;
 
 	private TetrisBlock nextRotation;
 	private TetrisBlock prevRotation;
@@ -80,7 +82,7 @@ public class TetrisBlock {
 
 	public boolean get(int row, int column) {
 		checkBounds(row, column);
-		return (data & (1L << row * width + column)) != 0;
+		return (data & (1L << (row * width + column))) != 0;
 	}
 
 	public int getBottomPadding(int column) {
@@ -100,6 +102,10 @@ public class TetrisBlock {
 			throw new IndexOutOfBoundsException("Row: " + row);
 		if (column < 0 || column >= width)
 			throw new IndexOutOfBoundsException("Column: " + column);
+	}
+
+	public long getRowData(int r) {
+		return (data >>> (r * width)) & ((1L << width) - 1);
 	}
 
 	@Override
