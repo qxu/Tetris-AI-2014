@@ -23,7 +23,7 @@ import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
-import com.qxu.tetris.ai.NewAI;
+import com.qxu.tetris.ai.Depth2AI;
 import com.qxu.tetris.ai.TetrisAI;
 import com.qxu.tetris.eval.Debug;
 
@@ -31,7 +31,7 @@ public class TetrisRunner implements Runnable {
 
 	public static void main(String[] args) {
 		TetrisRunner runner = new TetrisRunner(20, 10, true);
-		runner.ai = new NewAI();
+		runner.ai = new Depth2AI();
 		runner.run();
 	}
 
@@ -87,7 +87,7 @@ public class TetrisRunner implements Runnable {
 
 		this.comp = new TetrisGridJComponent(grid);
 		this.nextComp = new TetrominoNextJComponent(seekSize);
-		this.scoreLabel = new JLabel("score: ");
+		this.scoreLabel = new JLabel("score: 0");
 
 		JFrame frame = new JFrame("Tetris");
 		JPanel contentPanel = new JPanel();
