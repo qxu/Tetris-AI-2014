@@ -28,6 +28,13 @@ import com.qxu.tetris.ai.TetrisAI;
 import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
+
+	public static void main(String[] args) {
+		TetrisRunner runner = new TetrisRunner(20, 10, true);
+		runner.ai = new NewAI();
+		runner.run();
+	}
+
 	private static boolean save = false;
 	private static String savePath = "saves.dat";
 
@@ -47,39 +54,33 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-	private static final int gridHeight = 20;
-	private static final int gridWidth = 10;
+	public int seekSize = 1;
 
-	private static final int seekSize = 1;
-
-	private static final boolean aSyncGfxUpdate = true;
+	private final boolean aSyncGfxUpdate;
 	
-	private static final TetrisAI ai = new NewAI();
+	public TetrisAI ai;
 
-	private static final Tetromino[] TETROMINOES = Tetromino.values();
+	public TetrisGrid grid;
+	public TetrisGridJComponent comp;
+	public TetrominoNextJComponent nextComp;
+	public JLabel scoreLabel;
 
-	private static final Random rand = new Random();
+	public int moveColumn;
+	public TetrisBlock moveBlock;
+	public int dropRow;
 
-	private TetrisGrid grid;
-	private TetrisGridJComponent comp;
-	private TetrominoNextJComponent nextComp;
-	private JLabel scoreLabel;
+	public Deque<Tetromino> next;
 
-	private int moveColumn;
-	private TetrisBlock moveBlock;
-	private int dropRow;
+	public Object moveLock = new Object();
+	public boolean nextMove = false;
 
-	private Deque<Tetromino> next;
+	public boolean saveMove = true;
 
-	private Object moveLock = new Object();
-	private boolean nextMove = false;
+	public int score;
 
-	private boolean saveMove = true;
-
-	private int score;
-
-	public TetrisRunner() {
+	public TetrisRunner(int gridHeight, int gridWidth, boolean aSync) {
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
+		this.aSyncGfxUpdate = aSync;
 		if (snapshot != null) {
 			this.grid = snapshot.createGrid();
 		}
@@ -196,97 +197,108 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
+
+	private static final Tetromino[] TETROMINOES = Tetromino.values();
+	private static final Random rand = new Random();
+
+	public Tetromino getNewTetromino() {
+		return TETROMINOES[rand.nextInt(TETROMINOES.length)];
+	}
+	
+	protected boolean turnLoop() {
+		Tetromino t;
+		if (seekSize > 0) {
+			t = next.removeFirst();
+			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+		} else {
+			t = getNewTetromino();
+		}
+		AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(
+				next));
+		if (move == null)
+			return false;
+
+		moveColumn = move.getColumn();
+		moveBlock = t.getBlockChain().get(move.getOrientation());
+
+		dropRow = grid.getDropRow(moveColumn, moveBlock);
+		if (dropRow >= grid.getHeight())
+			return false;
+
+		if (snapshot != null) {
+			if (snapshot.getMoveBlock() != null) {
+				moveColumn = snapshot.getMoveColumn();
+				moveBlock = snapshot.getMoveBlock();
+				dropRow = grid.getDropRow(moveColumn, moveBlock);
+			}
+			snapshot = null;
+		}
+
+		if (!aSyncGfxUpdate) {
+			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
+			nextComp.setNext(new ArrayList<>(next));
+			comp.repaint();
+			nextComp.repaint();
+		}
+		while (!nextMove) {
+			Debug.waitFor(moveLock);
+			dropRow = grid.getDropRow(moveColumn, moveBlock);
+			if (!aSyncGfxUpdate) {
+				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
+				comp.repaint();
+			}
+		}
+
+		if (save && saveMove) {
+			File f = new File(savePath);
+			try {
+				FileOutputStream out = new FileOutputStream(f, true);
+				TetrisGridSnapshot ss = new TetrisGridSnapshot(grid,
+						moveBlock, dropRow, null);
+				ss.writeTo(out);
+				System.out.println("move serialized");
+				out.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		int rowsCleared = grid.addAndClearRows(dropRow, moveColumn, moveBlock);
+		
+		moveBlock = null;
+		if (!aSyncGfxUpdate) {
+			nextMove = false;
+			saveMove = true;
+
+			comp.setMoveBlock(null, 0, 0);
+			comp.repaint();
+		}
+
+		if (rowsCleared > 0) {
+			score += rowsCleared;
+
+			if (!aSyncGfxUpdate) {
+				scoreLabel.setText("score: "
+						+ NumberFormat.getInstance(Locale.US).format(score)
+								.replace(",", " "));
+			}
+		}
+		
+		return true;
+	}
+
 	@Override
 	public void run() {
 		next = new ArrayDeque<>(seekSize);
 		for (int i = 0; i < seekSize; i++) {
-			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+			next.addLast(getNewTetromino());
 		}
 
 		score = 0;
 		while (true) {
-			Tetromino t;
-			if (seekSize > 0) {
-				t = next.removeFirst();
-				next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
-			} else {
-				t = TETROMINOES[rand.nextInt(TETROMINOES.length)];
-			}
-			AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(
-					next));
-			if (move == null)
+			boolean cont = turnLoop();
+			if (!cont)
 				break;
-
-			moveColumn = move.getColumn();
-			moveBlock = t.getBlockChain().get(move.getOrientation());
-
-			dropRow = grid.getDropRow(moveColumn, moveBlock);
-			if (dropRow >= grid.getHeight())
-				break;
-
-			if (snapshot != null) {
-				if (snapshot.getMoveBlock() != null) {
-					moveColumn = snapshot.getMoveColumn();
-					moveBlock = snapshot.getMoveBlock();
-					dropRow = grid.getDropRow(moveColumn, moveBlock);
-				}
-				snapshot = null;
-			}
-
-			if (!aSyncGfxUpdate) {
-				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
-				nextComp.setNext(new ArrayList<>(next));
-				comp.repaint();
-				nextComp.repaint();
-			}
-			while (!nextMove) {
-				Debug.waitFor(moveLock);
-				dropRow = grid.getDropRow(moveColumn, moveBlock);
-				if (!aSyncGfxUpdate) {
-					comp.setMoveBlock(moveBlock, dropRow, moveColumn);
-					comp.repaint();
-				}
-			}
-
-			if (save && saveMove) {
-				File f = new File(savePath);
-				try {
-					FileOutputStream out = new FileOutputStream(f, true);
-					TetrisGridSnapshot ss = new TetrisGridSnapshot(grid,
-							moveBlock, dropRow, null);
-					ss.writeTo(out);
-					System.out.println("move serialized");
-					out.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-
-			int rowsCleared = grid.addAndClearRows(dropRow, moveColumn, moveBlock);
-			
-			moveBlock = null;
-			if (!aSyncGfxUpdate) {
-				nextMove = false;
-				saveMove = true;
-
-				comp.setMoveBlock(null, 0, 0);
-				comp.repaint();
-			}
-
-			if (rowsCleared > 0) {
-				score += rowsCleared;
-
-				if (!aSyncGfxUpdate) {
-					scoreLabel.setText("score: "
-							+ NumberFormat.getInstance(Locale.US).format(score)
-									.replace(",", " "));
-				}
-			}
 		}
-	}
-
-	public static void main(String[] args) {
-		TetrisRunner runner = new TetrisRunner();
-		runner.run();
 	}
 }

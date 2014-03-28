@@ -1,102 +1,47 @@
 package com.qxu.tetris.gfx;
 
-import java.text.NumberFormat;
 import java.util.List;
-import java.util.Locale;
-
-import javax.swing.BoxLayout;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
+import com.qxu.tetris.ai.TetrisAI;
 import com.qxu.tetris.ai.newscores.ColumnTransitions;
 import com.qxu.tetris.ai.newscores.Holes;
 import com.qxu.tetris.ai.newscores.RowTransitions;
 import com.qxu.tetris.ai.newscores.Wells;
 
 public class Hatetris {
-	private static TetrisGridJComponent comp;
-	private static JLabel scoreLabel;
-	private static int score;
-
-	private static void initComp(TetrisGrid grid) {
-		comp = new TetrisGridJComponent(grid);
-		scoreLabel = new JLabel("score: ");
-
-		JFrame frame = new JFrame("Tetris");
-		JPanel contentPanel = new JPanel();
-		contentPanel
-				.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
-		JPanel drawPanel = new JPanel();
-		drawPanel.add(comp);
-		contentPanel.add(drawPanel);
-		contentPanel.add(scoreLabel);
-		frame.setContentPane(contentPanel);
-		frame.pack();
-		frame.setLocationRelativeTo(null);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-
-		comp.setFocusable(true);
-
-		Thread t = new Thread("async tetris gfx updater") {
-			@Override
-			public void run() {
-				while (true) {
-					try {
-						comp.repaint();
-						scoreLabel.setText("score: "
-								+ NumberFormat.getInstance(Locale.US)
-										.format(score).replace(",", " "));
-					} catch (Exception e) {
-						// ignore concurrency exception for a-sync run
-					}
-					try {
-						Thread.sleep(20);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-				}
-			}
-		};
-		t.start();
-	}
-
-	public static void main(String[] args) {
-		TetrisGrid grid = new TetrisGrid(20, 10);
-		initComp(grid);
-
-		while (true) {
-			Tetromino next = worstPiece(grid);
-			
-			AIMove move = searchMove(grid, next, 2);
-			
-			int moveColumn = move.getColumn();
-			if (moveColumn < 0) {
-				break;
-			}
-			
-			TetrisBlock moveBlock = next.getBlockChain().get(move.getOrientation());
-			int dropRow = grid.getDropRow(moveColumn, moveBlock);
-			
-			comp.setGrid(grid);
-			comp.setMoveBlock(moveBlock, dropRow, moveColumn);
-			comp.repaint();
-			
+	private static final TetrisRunner runner = new TetrisRunner(20, 10, false) {
+		@Override
+		public Tetromino getNewTetromino() {
+			return worstPiece(grid);
+		}
+		@Override
+		protected boolean turnLoop() {
+			boolean cont = super.turnLoop();
 			try {
 				Thread.sleep(200);
 			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-			
-			grid.addBlock(dropRow, moveColumn, moveBlock);
-			score += grid.clearFullRows();
-			comp.setMoveBlock(null, 0, 0);
-		}
-		System.out.println("score: " + score);
+			return cont;
+		};
+	};
+	
+	public static void main(String[] args) {
+		runner.seekSize = 0;
+		runner.ai = new TetrisAI() {
+			@Override
+			public AIMove getMove(TetrisGrid grid, Tetromino t, List<Tetromino> next) {
+				AIMove move = searchMove(grid, t, 1);
+				runner.comp.setGrid(grid);
+				return move;
+			}
+		};
+		runner.run();
+		System.out.println("terminated.");
 	}
 
 	private static final double[] w = new double[] { -4.500158825082766,
@@ -132,7 +77,7 @@ public class Hatetris {
 					subGrid.addBlock(row, c, block);
 					subGrid.clearFullRows();
 					
-					comp.setGrid(subGrid);
+					runner.comp.setGrid(subGrid);
 
 					Tetromino next = worstPiece(subGrid);
 					double subScore = search(subGrid, next, depth - 1);
@@ -161,7 +106,7 @@ public class Hatetris {
 					subGrid.addBlock(row, c, block);
 					int rowsCleared = subGrid.clearFullRows();
 					
-					comp.setGrid(subGrid);
+					runner.comp.setGrid(subGrid);
 
 					Tetromino next = worstPiece(subGrid);
 					double subScore;
