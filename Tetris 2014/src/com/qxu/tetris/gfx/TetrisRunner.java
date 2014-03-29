@@ -56,6 +56,7 @@ public class TetrisRunner implements Runnable {
 	public int seekSize = 1;
 
 	private final boolean aSyncGfxUpdate;
+	public Thread aSyncUpdateThread;
 
 	public TetrisAI ai;
 
@@ -175,7 +176,7 @@ public class TetrisRunner implements Runnable {
 		});
 
 		if (aSyncGfxUpdate) {
-			Thread t = new Thread("async tetris gfx updater") {
+			aSyncUpdateThread = new Thread("async tetris gfx updater") {
 				@Override
 				public void run() {
 					while (true) {
@@ -194,12 +195,12 @@ public class TetrisRunner implements Runnable {
 						try {
 							Thread.sleep(20);
 						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
+							break;
 						}
 					}
 				}
 			};
-			t.start();
+			aSyncUpdateThread.start();
 		}
 	}
 
@@ -245,6 +246,7 @@ public class TetrisRunner implements Runnable {
 			comp.repaint();
 			nextComp.repaint();
 		}
+
 		while (!nextMove) {
 			synchronized (moveLock) {
 				try {
@@ -279,6 +281,7 @@ public class TetrisRunner implements Runnable {
 		linesCleared += rowsCleared;
 
 		moveBlock = null;
+
 		if (!aSyncGfxUpdate) {
 			nextMove = false;
 			saveMove = true;

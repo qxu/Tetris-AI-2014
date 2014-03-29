@@ -9,22 +9,33 @@ import com.qxu.tetris.ai.TetrisAI;
 
 public class Lovetris extends TetrisRunner {
 	public static void main(String[] args) {
-		TetrisRunner runner = new Lovetris(20, 10, true);
-		Thread t = new Thread(runner);
+		Lovetris love = new Lovetris(20, 10, true);
+		love.nextMove = true;
+
+		final Thread runner = Thread.currentThread();
+		Thread interrupter = new Thread() {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e) {
+					throw new AssertionError(e);
+				}
+				runner.interrupt();
+			}
+		};
+		interrupter.start();
+
 		long start = System.nanoTime();
-		runner.nextMove = true;
-		t.start();
-		try {
-			Thread.sleep(30000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		love.run();
 		long stop = System.nanoTime();
-		t.interrupt();
-		runner.frame.dispose();
-		System.out.println(runner.linesCleared / ((stop - start) / 1.0e9) + " lines per second");
-		System.out.println(((double) (stop - start)) / runner.linesCleared + " ns per line");
-		System.out.println(((double) (stop - start)) / runner.pieceCount + " ns per piece");
+
+		love.aSyncUpdateThread.interrupt();
+		love.frame.dispose();
+		
+		System.out.println(love.linesCleared / ((stop - start) / 1.0e9) + " lines per second");
+		System.out.println(((double) (stop - start)) / love.linesCleared + " ns per line");
+		System.out.println(((double) (stop - start)) / love.pieceCount + " ns per piece");
 	}
 
 	private int column;
