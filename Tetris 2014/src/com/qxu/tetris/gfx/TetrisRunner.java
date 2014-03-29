@@ -25,7 +25,6 @@ import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
 import com.qxu.tetris.ai.Depth2AI;
 import com.qxu.tetris.ai.TetrisAI;
-import com.qxu.tetris.eval.Debug;
 
 public class TetrisRunner implements Runnable {
 
@@ -57,13 +56,14 @@ public class TetrisRunner implements Runnable {
 	public int seekSize = 1;
 
 	private final boolean aSyncGfxUpdate;
-	
+
 	public TetrisAI ai;
 
 	public TetrisGrid grid;
 	public TetrisGridJComponent comp;
 	public TetrominoNextJComponent nextComp;
 	public JLabel scoreLabel;
+	public JFrame frame;
 
 	public int moveColumn;
 	public TetrisBlock moveBlock;
@@ -76,7 +76,8 @@ public class TetrisRunner implements Runnable {
 
 	public boolean saveMove = true;
 
-	public int score;
+	public int pieceCount;
+	public int linesCleared;
 
 	public TetrisRunner(int gridHeight, int gridWidth, boolean aSync) {
 		this.grid = new TetrisGrid(gridHeight, gridWidth);
@@ -89,7 +90,7 @@ public class TetrisRunner implements Runnable {
 		this.nextComp = new TetrominoNextJComponent(seekSize);
 		this.scoreLabel = new JLabel("score: 0");
 
-		JFrame frame = new JFrame("Tetris");
+		this.frame = new JFrame("Tetris");
 		JPanel contentPanel = new JPanel();
 		contentPanel
 				.setLayout(new BoxLayout(contentPanel, BoxLayout.PAGE_AXIS));
@@ -114,7 +115,9 @@ public class TetrisRunner implements Runnable {
 							|| e.getKeyCode() == KeyEvent.VK_SPACE) {
 						nextMove = !nextMove;
 						if (nextMove) {
-							Debug.notifyAll(moveLock);
+							synchronized (moveLock) {
+								moveLock.notifyAll();
+							}
 						}
 					}
 					return;
@@ -165,7 +168,9 @@ public class TetrisRunner implements Runnable {
 					return;
 				}
 
-				Debug.notifyAll(moveLock);
+				synchronized (moveLock) {
+					moveLock.notifyAll();
+				}
 			}
 		});
 
@@ -181,7 +186,8 @@ public class TetrisRunner implements Runnable {
 							nextComp.repaint();
 							scoreLabel.setText("score: "
 									+ NumberFormat.getInstance(Locale.US)
-											.format(score).replace(",", " "));
+											.format(linesCleared)
+											.replace(",", " "));
 						} catch (Exception e) {
 							// ignore concurrency exception for a-sync run
 						}
@@ -197,24 +203,23 @@ public class TetrisRunner implements Runnable {
 		}
 	}
 
-
 	private static final Tetromino[] TETROMINOES = Tetromino.values();
 	private static final Random rand = new Random();
 
 	public Tetromino getNewTetromino() {
 		return TETROMINOES[rand.nextInt(TETROMINOES.length)];
 	}
-	
+
 	protected boolean turnLoop() {
 		Tetromino t;
 		if (seekSize > 0) {
 			t = next.removeFirst();
-			next.addLast(TETROMINOES[rand.nextInt(TETROMINOES.length)]);
+			next.addLast(getNewTetromino());
 		} else {
 			t = getNewTetromino();
 		}
-		AIMove move = ai.getMove(new TetrisGrid(grid), t, new ArrayList<>(
-				next));
+		AIMove move = ai
+				.getMove(new TetrisGrid(grid), t, new ArrayList<>(next));
 		if (move == null)
 			return false;
 
@@ -241,7 +246,13 @@ public class TetrisRunner implements Runnable {
 			nextComp.repaint();
 		}
 		while (!nextMove) {
-			Debug.waitFor(moveLock);
+			synchronized (moveLock) {
+				try {
+					moveLock.wait();
+				} catch (InterruptedException e) {
+					return false;
+				}
+			}
 			dropRow = grid.getDropRow(moveColumn, moveBlock);
 			if (!aSyncGfxUpdate) {
 				comp.setMoveBlock(moveBlock, dropRow, moveColumn);
@@ -253,8 +264,8 @@ public class TetrisRunner implements Runnable {
 			File f = new File(savePath);
 			try {
 				FileOutputStream out = new FileOutputStream(f, true);
-				TetrisGridSnapshot ss = new TetrisGridSnapshot(grid,
-						moveBlock, dropRow, null);
+				TetrisGridSnapshot ss = new TetrisGridSnapshot(grid, moveBlock,
+						dropRow, null);
 				ss.writeTo(out);
 				System.out.println("move serialized");
 				out.close();
@@ -264,7 +275,9 @@ public class TetrisRunner implements Runnable {
 		}
 
 		int rowsCleared = grid.addAndClearRows(dropRow, moveColumn, moveBlock);
-		
+		pieceCount++;
+		linesCleared += rowsCleared;
+
 		moveBlock = null;
 		if (!aSyncGfxUpdate) {
 			nextMove = false;
@@ -272,18 +285,14 @@ public class TetrisRunner implements Runnable {
 
 			comp.setMoveBlock(null, 0, 0);
 			comp.repaint();
-		}
 
-		if (rowsCleared > 0) {
-			score += rowsCleared;
-
-			if (!aSyncGfxUpdate) {
+			if (rowsCleared > 0) {
 				scoreLabel.setText("score: "
-						+ NumberFormat.getInstance(Locale.US).format(score)
-								.replace(",", " "));
+						+ NumberFormat.getInstance(Locale.US)
+								.format(linesCleared).replace(",", " "));
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -294,10 +303,13 @@ public class TetrisRunner implements Runnable {
 			next.addLast(getNewTetromino());
 		}
 
-		score = 0;
+		pieceCount = 0;
+		linesCleared = 0;
 		while (true) {
 			boolean cont = turnLoop();
 			if (!cont)
+				break;
+			if (Thread.interrupted())
 				break;
 		}
 	}
