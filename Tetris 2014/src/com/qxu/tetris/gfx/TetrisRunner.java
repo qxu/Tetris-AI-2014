@@ -23,14 +23,16 @@ import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.TetrisGridSnapshot;
 import com.qxu.tetris.Tetromino;
 import com.qxu.tetris.ai.AIMove;
+import com.qxu.tetris.ai.Depth1AI;
 import com.qxu.tetris.ai.Depth2AI;
+import com.qxu.tetris.ai.NewAI2;
 import com.qxu.tetris.ai.TetrisAI;
 
 public class TetrisRunner implements Runnable {
 
 	public static void main(String[] args) {
 		TetrisRunner runner = new TetrisRunner(20, 10, true);
-		runner.ai = new Depth2AI();
+		runner.ai = new Depth1AI();
 		runner.run();
 	}
 
