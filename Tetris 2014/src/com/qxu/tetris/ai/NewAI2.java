@@ -5,6 +5,8 @@ import java.util.List;
 import com.qxu.tetris.TetrisBlock;
 import com.qxu.tetris.TetrisGrid;
 import com.qxu.tetris.Tetromino;
+import com.qxu.tetris.ai.newscores.AltitudeDifference;
+import com.qxu.tetris.ai.newscores.Blocks;
 import com.qxu.tetris.ai.newscores.ColumnTransitions;
 import com.qxu.tetris.ai.newscores.Holes;
 import com.qxu.tetris.ai.newscores.RowTransitions;
@@ -52,7 +54,7 @@ public class NewAI2 implements TetrisAI {
 	private static final double[] e = { 0.935, 1.839, 0.905, 1.078, 0.858,
 			2.207, 1.565, 0.023, 0.117, 0.894, 1.474, 1.346 };
 
-	private static double getScore(TetrisGrid grid, TetrisBlock block,
+	/*private static double getScore(TetrisGrid grid, TetrisBlock block,
 			int moveHeight, int rowsCleared) {
 		double lh = moveHeight + (block.getHeight() - 1) / 2.0;
 		int re = rowsCleared;
@@ -63,5 +65,24 @@ public class NewAI2 implements TetrisAI {
 		return w[0] * lh + w[1] * re + w[2] * rt + w[3] * ct + w[4] * ho + w[5]
 				* ws;
 
-	}
+	}*/
+	private static double getScore(TetrisGrid grid, TetrisBlock block, int moveHeight, int rowsCleared){//exponential
+		int ph = AltitudeDifference.getPileHeight(grid);
+		int h = Holes.getHoles(grid);
+		int ch = Holes.getConnectedHoles(grid);
+		int rl = rowsCleared;
+		int ad = AltitudeDifference.getAltitudeDifference(grid);
+		int mwd = Wells.getMaxWell(grid);
+		int ws = Wells.getWellSums(grid);
+		double lh = moveHeight + (block.getHeight() - 1) / 2.0;
+		int b = Blocks.getNumOfBlocks(grid);
+		int wb = Blocks.getWeightedBlocks(grid);
+		int rt = RowTransitions.getRowTransitions(grid);
+		int ct = ColumnTransitions.getColumnTransitions(grid);
+		return w[0]*Math.pow(ph,e[0]) + w[1]*Math.pow(h,e[1]) + w[2]*Math.pow(ch,e[2])
+				+ w[3]*Math.pow(rl,e[3]) + w[4]*Math.pow(ad,e[4]) + w[5]*Math.pow(mwd,e[5])
+				+ w[6]*Math.pow(ws,e[6]) + w[7]*Math.pow(lh,e[7]) + w[8]*Math.pow(b,e[8])
+				+ w[9]*Math.pow(wb,e[9]) + w[10]*Math.pow(rt,e[10]) + w[11]*Math.pow(ct,e[11]);
+	} 
+	//Math.pow(base,exponent)
 }
