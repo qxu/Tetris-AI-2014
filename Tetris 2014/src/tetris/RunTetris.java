@@ -15,12 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import static javax.swing.JComponent.WHEN_IN_FOCUSED_WINDOW;
-import javax.swing.JFileChooser;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,7 +33,7 @@ import javax.swing.event.ChangeListener;
  * @author justinbehymer
  */
 
-public class RunTetris extends JComponent {
+public class RunTetris extends JComponent implements Runnable {
 
 	
 	protected PiecePanel nextPiecePanel; // Displays the nextPiece for the player to see
@@ -45,7 +43,7 @@ public class RunTetris extends JComponent {
 	protected JLabel timeLabel;
 	protected JButton startButton;
 	protected JButton stopButton;
-	protected javax.swing.Timer timer;
+	protected boolean running = false;
 	protected JSlider speed;
         protected JLabel rowsClearedLabel;
         protected JSlider Diffcult;
@@ -53,6 +51,7 @@ public class RunTetris extends JComponent {
 	
         // milliseconds per tick
 	public final int DELAY = 400;	
+	private int delay = DELAY;
 	
         // used to measure elapsed time
 	protected long startTime;	
@@ -66,15 +65,6 @@ public class RunTetris extends JComponent {
 		setPreferredSize(new Dimension(width, height));
 		
 		tc = new TetrisController();
-		
-		// Create the Timer object and have it send
-		timer = new javax.swing.Timer(DELAY, new ActionListener() 
-                {
-			public void actionPerformed(ActionEvent e) 
-                        {
-				tick(TetrisController.DOWN);
-			}
-		});
 	}
         
        
@@ -93,6 +83,18 @@ public class RunTetris extends JComponent {
 		
 		repaint();
 	}
+	
+	@Override
+	public void run() {
+		while (running) {
+			tick(TetrisController.DOWN);
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
 
 	/**
 	 Sets the internal state and starts the timer
@@ -107,7 +109,9 @@ public class RunTetris extends JComponent {
 		enableButtons();
 		timeLabel.setText(" ");
 		
-		timer.start();
+		running = true;
+		Thread t = new Thread(this, "tetris runner");
+		t.start();
 		startTime = System.currentTimeMillis();
                                
                 // LEFT
@@ -208,7 +212,7 @@ public class RunTetris extends JComponent {
 	public void stopGame() {
 		tc.gameOn = false;
 		enableButtons();
-		timer.stop();
+		running = false;
 		
 		long delta = (System.currentTimeMillis() - startTime)/10;
 		timeLabel.setText(Double.toString(delta/100.0) + " seconds");                
@@ -352,7 +356,7 @@ public class RunTetris extends JComponent {
 	public void updateTimer() 
         {
 		double value = ((double)speed.getValue())/speed.getMaximum();
-		timer.setDelay((int)(DELAY - value*DELAY));
+		delay = (int)(DELAY - value*DELAY);
 	}
 	
 	
@@ -391,7 +395,13 @@ public class RunTetris extends JComponent {
                 {
 			public void actionPerformed(ActionEvent e) 
                         {
-				startGame();
+				Thread t = new Thread("tetris game thread") {
+					@Override
+					public void run() {
+						startGame();
+					};
+				};
+				t.start();
 			}
 		});
                 
