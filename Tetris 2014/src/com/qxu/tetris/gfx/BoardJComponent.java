@@ -19,13 +19,18 @@ public class BoardJComponent extends JComponent {
 	private static final Color filledCellColor = Color.LIGHT_GRAY;
 	private static final Color emptyCellColor = Color.DARK_GRAY;
 	private static final Color moveCellColor = Color.CYAN;
+	private static final Color selectedCellColor = Color.GRAY;
 	private static final Color borderColor = Color.BLACK;
 
-	private volatile Board board;
+	private Board board;
 
-	private volatile Piece movePiece;
-	private volatile int moveY;
-	private volatile int moveX;
+	private Piece movePiece;
+	private int moveY;
+	private int moveX;
+	
+	private Piece selectedPiece;
+	private int selectedX;
+	private int selectedY;
 	
 	private int boardWidth;
 	private int boardHeight;
@@ -60,6 +65,12 @@ public class BoardJComponent extends JComponent {
 		this.moveY = y;
 		this.moveX = x;
 	}
+	
+	public synchronized void setSelectedPiece(Piece p, int x, int y) {
+		this.selectedPiece = p;
+		this.selectedX = x;
+		this.selectedY = y;
+	}
 
 	@Override
 	protected synchronized void paintComponent(Graphics g) {
@@ -79,6 +90,16 @@ public class BoardJComponent extends JComponent {
 				}
 				int gX = x * totalLength + borderSize;
 				int gY = (boardHeight - y - 1) * totalLength + borderSize;
+				g.fillRect(gX, gY, cellSize, cellSize);
+			}
+		}
+		
+		if (selectedPiece != null) {
+			g.setColor(selectedCellColor);
+			for (Point pt : selectedPiece.getBody()) {
+				int gX = (selectedX + pt.x) * totalLength + borderSize;
+				int gY = (boardHeight - (selectedY + pt.y) - 1) * totalLength
+						+ borderSize;
 				g.fillRect(gX, gY, cellSize, cellSize);
 			}
 		}

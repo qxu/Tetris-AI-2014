@@ -1,5 +1,7 @@
 package tetris;
 
+import java.util.Arrays;
+
 import com.qxu.tetris.gfx.GridDebugger;
 
 import AIHelper.BoardRater;
@@ -41,9 +43,9 @@ public class WesthillAI implements AI {
 									- cur2.getWidth() + 1;
 
 							for (int x2 = 0; x2 < xMax2; x2++) {
-								int y2 = board.dropHeight(cur2, x2);
+								int y2 = subBoard1.dropHeight(cur2, x2);
 								if ((y2 < yMax2)
-										&& board.canPlace(cur2, x2, y2)) {
+										&& subBoard1.canPlace(cur2, x2, y2)) {
 									Board subBoard2 = new Board(subBoard1);
 									subBoard2.place(cur2, x2, y2);
 									int rowsCleared2 = subBoard2.clearRows();
@@ -56,21 +58,12 @@ public class WesthillAI implements AI {
 										bestX = x1;
 										bestY = y1;
 										bestPiece = cur1;
-										
-										debugger.setBoard(board);
-										debugger.setMovePiece(bestPiece, bestX, bestY);
-										debugger.repaint();
-										try {
-											Thread.sleep(200);
-										} catch (InterruptedException e) {
-											e.printStackTrace();
-										}
 									}
 								}
 							}
 
 							cur2 = cur2.nextRotation();
-						} while (cur2 != nextPiece);
+						} while (cur2 != nextPiece || !cur2.equals(nextPiece));
 					} else {
 						double score = getScore(subBoard1, cur1, y1,
 								rowsCleared1);
@@ -86,12 +79,18 @@ public class WesthillAI implements AI {
 			}
 
 			cur1 = cur1.nextRotation();
-		} while (cur1 != piece);
+		} while (cur1 != piece || !cur1.equals(piece));
 
 		Move move = new Move();
 		move.x = bestX;
 		move.y = bestY;
 		move.piece = bestPiece;
+		
+		debugger.getComp().setBoard(board);
+		debugger.getComp().setMovePiece(bestPiece, bestX, bestY);
+		debugger.getComp().repaint();
+		debugger.getNextComp().setNext(Arrays.asList(nextPiece));
+		debugger.getNextComp().repaint();
 
 		return move;
 	}
