@@ -82,14 +82,6 @@ public class TetrisController {
             currentMove = newMove;
             displayBoard = new DisplayBoard(board);
             displayBoard.place(currentMove);
-            
-//            for (int y = displayBoard.getHeight() - 1; y >= 0; y--) {
-//	            for (int x = 0; x < displayBoard.getWidth(); x++) {
-//	            	System.out.print(displayBoard.getGrid(x, y) ? "1" : " ");
-//	            }
-//	            System.out.println();
-//            }
-//            System.out.println("------------");
         }
         else
         {
