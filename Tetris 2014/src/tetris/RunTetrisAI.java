@@ -17,7 +17,7 @@ public class RunTetrisAI extends RunTetris {
     
 	private static final long serialVersionUID = 1L;
 
-	private AI mBrain = new ITLPAI();
+	private AI mBrain = new WesthillAI();
 	private Move mMove;
 	protected javax.swing.Timer timerAI;
 	int current_count = -1;

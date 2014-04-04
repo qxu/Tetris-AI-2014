@@ -6,7 +6,6 @@
 
 package tetris;
 
-import debug.Debug;
 import AIHelper.BoardRater;
 import AIHelper.FinalRater;
 
@@ -59,7 +58,6 @@ public class ITLPAI implements AI {
 		move.y = bestY;
 		move.piece = bestPiece;
 
-		Debug.printPiece(bestPiece);
 		return (move);
 	}
 
