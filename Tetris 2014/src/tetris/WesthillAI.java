@@ -1,21 +1,12 @@
 package tetris;
 
-import java.util.Arrays;
-
-import com.qxu.tetris.gfx.GridDebugger;
-
 import AIHelper.BoardRater;
 
 public class WesthillAI implements AI {
-	private GridDebugger debugger = new GridDebugger();
 	
 	@Override
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
 			int limitHeight) {
-		System.out.println("current piece: " + piece);
-		System.out.println("next piece: " + nextPiece);
-		
-//		nextPiece = null;
 
 		double bestScore = Double.NEGATIVE_INFINITY;
 		int bestX = -1;
@@ -85,12 +76,6 @@ public class WesthillAI implements AI {
 		move.x = bestX;
 		move.y = bestY;
 		move.piece = bestPiece;
-		
-		debugger.getComp().setBoard(board);
-		debugger.getComp().setMovePiece(bestPiece, bestX, bestY);
-		debugger.getComp().repaint();
-		debugger.getNextComp().setNext(Arrays.asList(nextPiece));
-		debugger.getNextComp().repaint();
 
 		return move;
 	}
