@@ -43,20 +43,21 @@ public class RunTetris extends JComponent implements Runnable {
 	protected JLabel timeLabel;
 	protected JButton startButton;
 	protected JButton stopButton;
-	protected boolean running = false;
 	protected JSlider speed;
         protected JLabel rowsClearedLabel;
         protected JSlider Diffcult;
         protected JLabel difficulty;  
 	
         // milliseconds per tick
-	public final int DELAY = 400;	
-	private int delay = DELAY;
+	private static final int MAX_DELAY = 400;	
+	protected int delay = 0;
 	
         // used to measure elapsed time
 	protected long startTime;	
 	
 	TetrisController tc;
+	
+	private Thread runnerThread;
         
 
 	RunTetris(int width, int height) {
@@ -86,14 +87,21 @@ public class RunTetris extends JComponent implements Runnable {
 	
 	@Override
 	public void run() {
-		while (running) {
+		System.out.println("starting...");
+		long start = System.nanoTime();
+		while (!Thread.interrupted()) {
 			tick(TetrisController.DOWN);
 			try {
 				Thread.sleep(delay);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+				break;
 			}
 		}
+		runnerThread = null;
+		long stop = System.nanoTime();
+		System.out.println("time: " + (stop - start) / 1.0e9 + " s");
+		System.out.println("rows cleared: " + tc.rowsCleared);
+		System.out.println("speed: " + tc.rowsCleared / ((stop - start) / 1.0e9) + " /s");
 	}
 
 	/**
@@ -109,9 +117,20 @@ public class RunTetris extends JComponent implements Runnable {
 		enableButtons();
 		timeLabel.setText(" ");
 		
-		running = true;
-		Thread t = new Thread(this, "tetris runner");
-		t.start();
+		runnerThread = new Thread(this, "tetris runner");
+		Thread stopper = new Thread("tetris stop timer") {
+			@Override
+			public void run() {
+				try {
+					Thread.sleep(30000);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
+				runnerThread.interrupt();
+			};
+		};
+		runnerThread.start();
+		stopper.start();
 		startTime = System.currentTimeMillis();
                                
                 // LEFT
@@ -212,7 +231,7 @@ public class RunTetris extends JComponent implements Runnable {
 	public void stopGame() {
 		tc.gameOn = false;
 		enableButtons();
-		running = false;
+		runnerThread.interrupt();
 		
 		long delta = (System.currentTimeMillis() - startTime)/10;
 		timeLabel.setText(Double.toString(delta/100.0) + " seconds");                
@@ -353,10 +372,8 @@ public class RunTetris extends JComponent implements Runnable {
 	 Updates the timer to reflect the current setting of the 
 	 speed slider.
 	*/
-	public void updateTimer() 
-        {
-		double value = ((double)speed.getValue())/speed.getMaximum();
-		delay = (int)(DELAY - value*DELAY);
+	public void updateTimer()  {
+		delay = speed.getValue();
 	}
 	
 	
@@ -422,7 +439,7 @@ public class RunTetris extends JComponent implements Runnable {
 		// SPEED slider
 		panel.add(Box.createVerticalStrut(12));
 		row.add(new JLabel("Speed:"));
-		speed = new JSlider(0, DELAY, 75);	// min, max, current
+		speed = new JSlider(0, MAX_DELAY, delay);	// min, max, current
 		speed.setPreferredSize(new Dimension(100,15));
                		
 		updateTimer();
