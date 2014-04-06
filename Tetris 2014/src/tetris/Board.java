@@ -171,9 +171,9 @@ public class Board {
 	 * 
 	 */
 	public final boolean getGrid(int x, int y) {
-		if (x < 0 || x > width)
+		if (x < 0 || x >= width)
 			return true;
-		if (y < 0 || y > height)
+		if (y < 0 || y >= height)
 			return true;
 		return grid[x][y];
 	}
