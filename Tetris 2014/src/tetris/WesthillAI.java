@@ -54,7 +54,6 @@ public class WesthillAI implements AI {
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
-//		return new BoardSearcher(board, piece, heightLimit).call();
 	}
 
 	@Override

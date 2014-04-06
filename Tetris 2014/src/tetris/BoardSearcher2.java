@@ -2,20 +2,22 @@ package tetris;
 
 import java.util.concurrent.Callable;
 
-public class BoardSearcher implements Callable<Move> {
+public class BoardSearcher2 implements Callable<Move> {
 	final Board board;
 	private final Piece piece;
+	private final Piece nextPiece;
 	private final int heightLimit;
 
-	public BoardSearcher(Board b, Piece p, int heightLimit) {
+	public BoardSearcher2(Board b, Piece p, Piece next, int heightLimit) {
 		this.board = b;
 		this.piece = p;
+		this.nextPiece = next;
 		this.heightLimit = heightLimit;
 	}
 
 	@Override
 	public Move call() {
-		return bestMove(board, piece, heightLimit);
+		return bestMove(board, piece, nextPiece, heightLimit);
 	}
 
 	/**
@@ -26,7 +28,8 @@ public class BoardSearcher implements Callable<Move> {
 	 * possible x-positions of the piece. The best score is then used to return
 	 * the AI's move.
 	 */
-	private static Move bestMove(Board board, Piece piece, int heightLimit) {
+	private static Move bestMove(Board board, Piece piece, Piece nextPiece,
+			int heightLimit) {
 		double bestScore = Double.NEGATIVE_INFINITY;
 		int bestX = -1;
 		int bestY = -1;
@@ -44,15 +47,35 @@ public class BoardSearcher implements Callable<Move> {
 					subBoard1.place(cur1, x1, y1);
 					int rowsCleared1 = subBoard1.clearRows();
 
-					double score = getScore(subBoard1, cur1, y1, rowsCleared1,
-							heightLimit);
+					Piece cur2 = nextPiece; // the current second piece
+					do {
+						final int yMax2 = heightLimit - cur2.getHeight() + 1;
+						final int xMax2 = subBoard1.getWidth()
+								- cur2.getWidth() + 1;
 
-					if (score > bestScore) {
-						bestScore = score;
-						bestX = x1;
-						bestY = y1;
-						bestPiece = cur1;
-					}
+						for (int x2 = 0; x2 < xMax2; x2++) {
+							int y2 = subBoard1.dropHeight(cur2, x2);
+							if ((y2 < yMax2)
+									&& subBoard1.canPlace(cur2, x2, y2)) {
+								Board subBoard2 = new Board(subBoard1);
+								subBoard2.place(cur2, x2, y2);
+								int rowsCleared2 = subBoard2.clearRows();
+
+								double score = getScore(subBoard2, cur2, y2,
+										rowsCleared1 + rowsCleared2,
+										heightLimit);
+
+								if (score > bestScore) {
+									bestScore = score;
+									bestX = x1;
+									bestY = y1;
+									bestPiece = cur1;
+								}
+							}
+						}
+
+						cur2 = cur2.nextRotation();
+					} while (cur2 != nextPiece || !cur2.equals(nextPiece));
 				}
 			}
 
