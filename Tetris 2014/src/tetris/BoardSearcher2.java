@@ -2,7 +2,7 @@ package tetris;
 
 import java.util.concurrent.Callable;
 
-public class BoardSearcher2 implements Callable<Move> {
+public class BoardSearcher2 implements Callable<BoardScore> {
 	final Board board;
 	private final Piece piece;
 	private final Piece nextPiece;
@@ -16,7 +16,7 @@ public class BoardSearcher2 implements Callable<Move> {
 	}
 
 	@Override
-	public Move call() {
+	public BoardScore call() {
 		return bestMove(board, piece, nextPiece, heightLimit);
 	}
 
@@ -28,7 +28,7 @@ public class BoardSearcher2 implements Callable<Move> {
 	 * possible x-positions of the piece. The best score is then used to return
 	 * the AI's move.
 	 */
-	private static Move bestMove(Board board, Piece piece, Piece nextPiece,
+	private static BoardScore bestMove(Board board, Piece piece, Piece nextPiece,
 			int heightLimit) {
 		double bestScore = Double.NEGATIVE_INFINITY;
 		int bestX = -1;
@@ -82,12 +82,12 @@ public class BoardSearcher2 implements Callable<Move> {
 			cur1 = cur1.nextRotation();
 		} while (cur1 != piece || !cur1.equals(piece));
 
-		Move move = new Move();
-		move.x = bestX;
-		move.y = bestY;
-		move.piece = bestPiece;
+		Move bestMove = new Move();
+		bestMove.x = bestX;
+		bestMove.y = bestY;
+		bestMove.piece = bestPiece;
 
-		return move;
+		return new BoardScore(bestMove, bestScore);
 	}
 
 	/*

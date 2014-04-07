@@ -19,7 +19,7 @@ import AIHelper.BoardRater;
 public class WesthillAI implements AI {
 	private ExecutorService exec = Executors.newSingleThreadExecutor();
 	private BoardSearcher searcher;
-	private Future<Move> futureMove;
+	private Future<BoardScore> futureScore;
 
 	public WesthillAI() {
 	}
@@ -35,20 +35,25 @@ public class WesthillAI implements AI {
 	@Override
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
 			int heightLimit) {
-		if (futureMove == null) {
+		if (futureScore == null) {
 			searcher = new BoardSearcher(board, piece, heightLimit);
-			futureMove = exec.submit(searcher);
+			futureScore = exec.submit(searcher);
 		}
 		try {
-			Move move = futureMove.get();
-
+			BoardScore score = futureScore.get();
+			System.out.println(score.score);
+			if (score.score < -800) {
+				BoardSearcher2 d2 = new BoardSearcher2(board, piece, nextPiece,
+						heightLimit);
+				score = d2.call();
+				System.out.println(" -> " + score.score);
+			}
 			Board subBoard = new Board(board);
-			subBoard.place(move);
+			subBoard.place(score.move);
 			subBoard.clearRows();
 			searcher = new BoardSearcher(subBoard, nextPiece, heightLimit);
-			futureMove = exec.submit(searcher);
-			
-			return move;
+			futureScore = exec.submit(searcher);
+			return score.move;
 		} catch (InterruptedException e) {
 			throw new RuntimeException(e);
 		} catch (ExecutionException e) {
