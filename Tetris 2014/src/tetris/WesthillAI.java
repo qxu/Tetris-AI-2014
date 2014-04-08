@@ -25,12 +25,7 @@ public class WesthillAI implements AI {
 	}
 
 	/**
-	 * Finds the best move. The best move is found by searching through each
-	 * possible move considering the next piece (if present, a depth 2 search)
-	 * and calculating the score of the sub-board. The search is done by
-	 * iterating through all possible orientations of a piece, then all the
-	 * possible x-positions of the piece. The best score is then used to return
-	 * the AI's move.
+	 * This method works similarly to 
 	 */
 	@Override
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
@@ -52,7 +47,7 @@ public class WesthillAI implements AI {
 					heightLimit);
 		}
 		Move move = score.move;
-		if (move.piece == null) {
+		if (move.piece == null) { //to avoid NullPointerException
 			move = new Move();
 			move.x = 0;
 			move.y = board.dropHeight(piece, 0);
