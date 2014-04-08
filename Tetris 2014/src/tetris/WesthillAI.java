@@ -47,13 +47,10 @@ public class WesthillAI implements AI {
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
-		System.out.println(score.score);
-		// if (score.score < -800) {
-		// BoardSearcher2 d2 = new BoardSearcher2(board, piece, nextPiece,
-		// heightLimit);
-		// score = d2.call();
-		// System.out.println(" -> " + score.score);
-		// }
+//		if (score.score < -1250) {
+//			score = BoardSearcher.bestBoardScore2(board, piece, nextPiece,
+//					heightLimit);
+//		}
 		Move move = score.move;
 		if (move.piece == null) {
 			move = new Move();
