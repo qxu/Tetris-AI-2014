@@ -89,10 +89,16 @@ public class WesthillAI implements AI {
 			return BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		}
 	}
-	
-	
+
 }
 
+/**
+ * A class to hold moves and scores as an intermediate between the WesthillAI
+ * and BoardSearcher.
+ * 
+ * @author qxu
+ * 
+ */
 class BoardScore {
 	final Move move;
 	final double score;
@@ -103,18 +109,22 @@ class BoardScore {
 	}
 }
 
+/**
+ * A helper class to do all the board searching and score finding for WesthillAI
+ * 
+ * @author qxu, mcGIT123
+ * 
+ */
 class BoardSearcher {
 
 	/**
-	 * Finds the best move. The best move is found by searching through each
-	 * possible move considering the next piece (if present, a depth 2 search)
-	 * and calculating the score of the sub-board. The search is done by
-	 * iterating through all possible orientations of a piece, then all the
-	 * possible x-positions of the piece. The best score is then used to return
-	 * the AI's move.
+	 * Finds the best move through a depth-1 search over the board. The best
+	 * move is found by searching through each possible move and calculating the
+	 * score of the sub-board. The search is done by iterating through all
+	 * possible orientations of a piece, then all the possible x-positions of
+	 * the piece. The best score is then used to return the AI's move.
 	 */
-	static BoardScore bestBoardScore(Board board, Piece piece,
-			int heightLimit) {
+	static BoardScore bestBoardScore(Board board, Piece piece, int heightLimit) {
 		double bestScore = Double.NEGATIVE_INFINITY;
 		int bestX = -1;
 		int bestY = -1;
@@ -156,12 +166,12 @@ class BoardSearcher {
 	}
 
 	/**
-	 * Finds the best move. The best move is found by searching through each
-	 * possible move considering the next piece (if present, a depth 2 search)
-	 * and calculating the score of the sub-board. The search is done by
-	 * iterating through all possible orientations of a piece, then all the
-	 * possible x-positions of the piece. The best score is then used to return
-	 * the AI's move.
+	 * Finds the best move through a depth-2 search over the board. The best
+	 * move is found by searching through each possible move considering the
+	 * next piece (a depth-2 search) and calculating the score of the sub-board.
+	 * The search is done by iterating through all possible orientations of a
+	 * piece, then all the possible x-positions of the piece. The best score is
+	 * then used to return the AI's move.
 	 */
 	static BoardScore bestBoardScore2(Board board, Piece piece,
 			Piece nextPiece, int heightLimit) {
@@ -403,4 +413,3 @@ class BoardSearcher {
 		return rowTransCount;
 	}
 }
-
