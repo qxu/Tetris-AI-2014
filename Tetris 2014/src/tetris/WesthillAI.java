@@ -47,10 +47,10 @@ public class WesthillAI implements AI {
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
-//		if (score.score < -1250) {
-//			score = BoardSearcher.bestBoardScore2(board, piece, nextPiece,
-//					heightLimit);
-//		}
+		if (score.score < -1250) {
+			score = BoardSearcher.bestBoardScore2(board, piece, nextPiece,
+					heightLimit);
+		}
 		Move move = score.move;
 		if (move.piece == null) {
 			move = new Move();
