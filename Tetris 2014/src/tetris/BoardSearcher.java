@@ -1,22 +1,6 @@
 package tetris;
 
-import java.util.concurrent.Callable;
-
-public class BoardSearcher implements Callable<BoardScore> {
-	final Board board;
-	private final Piece piece;
-	private final int heightLimit;
-
-	public BoardSearcher(Board b, Piece p, int heightLimit) {
-		this.board = b;
-		this.piece = p;
-		this.heightLimit = heightLimit;
-	}
-
-	@Override
-	public BoardScore call() {
-		return bestBoardScore(board, piece, heightLimit);
-	}
+public class BoardSearcher {
 
 	/**
 	 * Finds the best move. The best move is found by searching through each
@@ -26,7 +10,8 @@ public class BoardSearcher implements Callable<BoardScore> {
 	 * possible x-positions of the piece. The best score is then used to return
 	 * the AI's move.
 	 */
-	private static BoardScore bestBoardScore(Board board, Piece piece, int heightLimit) {
+	public static BoardScore bestBoardScore(Board board, Piece piece,
+			int heightLimit) {
 		double bestScore = Double.NEGATIVE_INFINITY;
 		int bestX = -1;
 		int bestY = -1;
@@ -53,6 +38,76 @@ public class BoardSearcher implements Callable<BoardScore> {
 						bestY = y1;
 						bestPiece = cur1;
 					}
+				}
+			}
+
+			cur1 = cur1.nextRotation();
+		} while (cur1 != piece || !cur1.equals(piece));
+
+		Move bestMove = new Move();
+		bestMove.x = bestX;
+		bestMove.y = bestY;
+		bestMove.piece = bestPiece;
+
+		return new BoardScore(bestMove, bestScore);
+	}
+
+	/**
+	 * Finds the best move. The best move is found by searching through each
+	 * possible move considering the next piece (if present, a depth 2 search)
+	 * and calculating the score of the sub-board. The search is done by
+	 * iterating through all possible orientations of a piece, then all the
+	 * possible x-positions of the piece. The best score is then used to return
+	 * the AI's move.
+	 */
+	public static BoardScore bestBoardScore2(Board board, Piece piece,
+			Piece nextPiece, int heightLimit) {
+		double bestScore = Double.NEGATIVE_INFINITY;
+		int bestX = -1;
+		int bestY = -1;
+		Piece bestPiece = null;
+
+		Piece cur1 = piece; // the current first piece
+		do {
+			final int yMax1 = heightLimit - cur1.getHeight() + 1;
+			final int xMax1 = board.getWidth() - cur1.getWidth() + 1;
+
+			for (int x1 = 0; x1 < xMax1; x1++) {
+				int y1 = board.dropHeight(cur1, x1);
+				if ((y1 < yMax1) && board.canPlace(cur1, x1, y1)) {
+					Board subBoard1 = new Board(board);
+					subBoard1.place(cur1, x1, y1);
+					int rowsCleared1 = subBoard1.clearRows();
+
+					Piece cur2 = nextPiece; // the current second piece
+					do {
+						final int yMax2 = heightLimit - cur2.getHeight() + 1;
+						final int xMax2 = subBoard1.getWidth()
+								- cur2.getWidth() + 1;
+
+						for (int x2 = 0; x2 < xMax2; x2++) {
+							int y2 = subBoard1.dropHeight(cur2, x2);
+							if ((y2 < yMax2)
+									&& subBoard1.canPlace(cur2, x2, y2)) {
+								Board subBoard2 = new Board(subBoard1);
+								subBoard2.place(cur2, x2, y2);
+								int rowsCleared2 = subBoard2.clearRows();
+
+								double score = getScore(subBoard2, cur2, y2,
+										rowsCleared1 + rowsCleared2,
+										heightLimit);
+
+								if (score > bestScore) {
+									bestScore = score;
+									bestX = x1;
+									bestY = y1;
+									bestPiece = cur1;
+								}
+							}
+						}
+
+						cur2 = cur2.nextRotation();
+					} while (cur2 != nextPiece || !cur2.equals(nextPiece));
 				}
 			}
 

@@ -1,5 +1,6 @@
 package tetris;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,7 +19,6 @@ import AIHelper.BoardRater;
  */
 public class WesthillAI implements AI {
 	private ExecutorService exec = Executors.newSingleThreadExecutor();
-	private BoardSearcher searcher;
 	private Future<BoardScore> futureScore;
 
 	public WesthillAI() {
@@ -36,14 +36,14 @@ public class WesthillAI implements AI {
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
 			int heightLimit) {
 		if (futureScore == null) {
-			searcher = new BoardSearcher(board, piece, heightLimit);
-			futureScore = exec.submit(searcher);
+			futureScore = exec.submit(new BoardSearcherCallable(board, piece,
+					heightLimit));
 		}
 		BoardScore score;
 		try {
 			score = futureScore.get();
 		} catch (InterruptedException e) {
-			score = searcher.call();
+			score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		} catch (ExecutionException e) {
 			throw new RuntimeException(e);
 		}
@@ -55,7 +55,7 @@ public class WesthillAI implements AI {
 		// System.out.println(" -> " + score.score);
 		// }
 		Move move = score.move;
-		if (move == null) {
+		if (move.piece == null) {
 			move = new Move();
 			move.x = 0;
 			move.y = board.dropHeight(piece, 0);
@@ -64,8 +64,8 @@ public class WesthillAI implements AI {
 			Board subBoard = new Board(board);
 			subBoard.place(move);
 			subBoard.clearRows();
-			searcher = new BoardSearcher(subBoard, nextPiece, heightLimit);
-			futureScore = exec.submit(searcher);
+			futureScore = exec.submit(new BoardSearcherCallable(subBoard,
+					nextPiece, heightLimit));
 		}
 
 		return move;
@@ -74,5 +74,23 @@ public class WesthillAI implements AI {
 	@Override
 	public void setRater(BoardRater r) {
 		throw new UnsupportedOperationException();
+	}
+
+	private static class BoardSearcherCallable implements Callable<BoardScore> {
+		final Board board;
+		final Piece piece;
+		final int heightLimit;
+
+		BoardSearcherCallable(Board b, Piece p, int height) {
+			this.board = b;
+			this.piece = p;
+			this.heightLimit = height;
+		}
+
+		@Override
+		public BoardScore call() throws Exception {
+			return BoardSearcher.bestBoardScore(board, piece, heightLimit);
+		}
+
 	}
 }
