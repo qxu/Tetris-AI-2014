@@ -62,7 +62,7 @@ public class WesthillAI implements AI {
 					heightLimit);
 		}
 		Move move = score.move;
-		if (move.piece == null) { //to avoid NullPointerException
+		if (move.piece == null) { // to avoid NullPointerException
 			move = new Move();
 			move.x = 0;
 			move.y = board.dropHeight(piece, 0);
@@ -79,7 +79,17 @@ public class WesthillAI implements AI {
 
 		return move;
 	}
-	
+
+	/**
+	 * Tests if two boards are equal by value since Board.equals doesn't
+	 * implement a value equality check.
+	 * 
+	 * @param b1
+	 *            the first board
+	 * @param b2
+	 *            the second board
+	 * @return true if the boards are equal, false otherwise
+	 */
 	private static boolean boardEquals(Board b1, Board b2) {
 		if (b1 == b2) {
 			return true;
@@ -95,7 +105,17 @@ public class WesthillAI implements AI {
 		}
 		return true;
 	}
-	
+
+	/**
+	 * Tests if two pieces are equal, optimizing if the two pieces are the same
+	 * reference.
+	 * 
+	 * @param p1
+	 *            the first piece
+	 * @param p2
+	 *            the second piece
+	 * @return true if the pieces are equal, false otherwise
+	 */
 	private static boolean pieceEquals(Piece p1, Piece p2) {
 		if (p1 == p2) {
 			return true;
@@ -126,7 +146,6 @@ public class WesthillAI implements AI {
 			return BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		}
 	}
-
 }
 
 /**
