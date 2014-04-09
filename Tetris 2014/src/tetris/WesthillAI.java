@@ -1,5 +1,9 @@
 package tetris;
 
+import java.awt.Point;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -19,6 +23,8 @@ import AIHelper.BoardRater;
  */
 public class WesthillAI implements AI {
 	private ExecutorService exec = Executors.newSingleThreadExecutor();
+	private Board futureBoard;
+	private Piece futurePiece;
 	private Future<BoardScore> futureScore;
 
 	public WesthillAI() {
@@ -34,16 +40,23 @@ public class WesthillAI implements AI {
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
 			int heightLimit) {
 		if (futureScore == null) {
+			futureBoard = board;
+			futurePiece = piece;
 			futureScore = exec.submit(new BoardSearcherCallable(board, piece,
 					heightLimit));
 		}
 		BoardScore score;
-		try {
-			score = futureScore.get();
-		} catch (InterruptedException e) {
+		if (boardEquals(board, futureBoard) && pieceEquals(piece, futurePiece)) {
+			try {
+				score = futureScore.get();
+			} catch (InterruptedException e) {
+				score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
+			} catch (ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			System.out.println("wtf!!!??!");
 			score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
-		} catch (ExecutionException e) {
-			throw new RuntimeException(e);
 		}
 		if (score.score < -1250) {
 			score = BoardSearcher.bestBoardScore2(board, piece, nextPiece,
@@ -59,11 +72,38 @@ public class WesthillAI implements AI {
 			Board subBoard = new Board(board);
 			subBoard.place(move);
 			subBoard.clearRows();
+			futureBoard = subBoard;
+			futurePiece = nextPiece;
 			futureScore = exec.submit(new BoardSearcherCallable(subBoard,
 					nextPiece, heightLimit));
 		}
 
 		return move;
+	}
+	
+	private static boolean boardEquals(Board b1, Board b2) {
+		if (b1 == b2) {
+			return true;
+		}
+		int minWidth = Math.min(b1.getWidth(), b2.getWidth());
+		for (int x = 0; x < minWidth; x++) {
+			int minHeight = Math.min(b1.getHeight(), b2.getHeight());
+			for (int y = 0; y < minHeight; y++) {
+				if (b1.getGrid(x, y) != b2.getGrid(x, y)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	private static boolean pieceEquals(Piece p1, Piece p2) {
+		if (p1 == p2) {
+			return true;
+		}
+		Set<Point> points1 = new HashSet<>(Arrays.asList(p1.getBody()));
+		Set<Point> points2 = new HashSet<>(Arrays.asList(p2.getBody()));
+		return points1.equals(points2);
 	}
 
 	@Override

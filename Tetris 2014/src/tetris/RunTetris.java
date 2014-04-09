@@ -51,7 +51,7 @@ public class RunTetris extends JComponent implements Runnable {
 	// milliseconds per tick
 	private static final int MAX_DELAY = 400;
 
-	protected static final long RUN_TIME_MILLIS = Long.MAX_VALUE;
+	protected static final long RUN_TIME_MILLIS = 30000;
 	protected int delay = 0;
 
 	// used to measure elapsed time
