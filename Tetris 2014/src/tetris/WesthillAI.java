@@ -96,8 +96,11 @@ public class WesthillAI implements AI {
 		}
 		int minWidth = Math.min(b1.getWidth(), b2.getWidth());
 		for (int x = 0; x < minWidth; x++) {
-			int minHeight = Math.min(b1.getHeight(), b2.getHeight());
-			for (int y = 0; y < minHeight; y++) {
+			int ch = b1.getColumnHeight(x);
+			if (ch != b2.getColumnHeight(x)) {
+				return false;
+			}
+			for (int y = 0; y < ch; y++) {
 				if (b1.getGrid(x, y) != b2.getGrid(x, y)) {
 					return false;
 				}
