@@ -198,6 +198,7 @@ class BoardSearcher {
 					subBoard1.place(cur1, x1, y1);
 					int rowsCleared1 = subBoard1.clearRows();
 
+					subBoard1.enableCaching();
 					double score = getScore(subBoard1, cur1, y1, rowsCleared1,
 							heightLimit);
 
@@ -262,6 +263,7 @@ class BoardSearcher {
 								subBoard2.place(cur2, x2, y2);
 								int rowsCleared2 = subBoard2.clearRows();
 
+								subBoard2.enableCaching();
 								double score = getScore(subBoard2, cur2, y2,
 										rowsCleared1 + rowsCleared2,
 										heightLimit);
