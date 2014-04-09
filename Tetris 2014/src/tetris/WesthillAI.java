@@ -25,7 +25,10 @@ public class WesthillAI implements AI {
 	}
 
 	/**
-	 * This method works similarly to 
+	 * This method utilizes the bestBoardScore method to find the best move for
+	 * the current piece. It also runs a separate thread to find the best move
+	 * for the next piece and makes sure that a NullPointerException will not
+	 * arise when there is no more room and the game is over.
 	 */
 	@Override
 	public Move bestMove(Board board, Piece piece, Piece nextPiece,
