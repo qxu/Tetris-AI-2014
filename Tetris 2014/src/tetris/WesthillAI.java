@@ -55,7 +55,6 @@ public class WesthillAI implements AI {
 				throw new RuntimeException(e);
 			}
 		} else {
-			System.out.println("wtf!!!??!");
 			score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		}
 		if (score.score < -1250) {
