@@ -47,14 +47,18 @@ public class WesthillAI implements AI {
 		}
 		BoardScore score;
 		if (boardEquals(board, futureBoard) && pieceEquals(piece, futurePiece)) {
+			// safety check to make sure boards are equal
 			try {
+				// retrieve the future move
 				score = futureScore.get();
 			} catch (InterruptedException e) {
 				score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
 			} catch (ExecutionException e) {
-				throw new RuntimeException(e);
+				throw new RuntimeException(e.getCause());
 			}
 		} else {
+			// fall-back is to call bestBoardScore without using multiple
+			// threads
 			score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		}
 		if (score.score < -1250) {
@@ -62,12 +66,14 @@ public class WesthillAI implements AI {
 					heightLimit);
 		}
 		Move move = score.move;
-		if (move.piece == null) { // to avoid NullPointerException
-			move = new Move();
+		if (move.piece == null) {
+			// to avoid NullPointerException when game is over, and there are no
+			// possible moves
 			move.x = 0;
 			move.y = board.dropHeight(piece, 0);
 			move.piece = piece;
 		} else {
+			// submit the thread to find the future move
 			Board subBoard = new Board(board);
 			subBoard.place(move);
 			subBoard.clearRows();
@@ -355,6 +361,8 @@ class BoardSearcher {
 	 */
 	private static double getWellScore(Board b) {
 		int wellScore = 0;
+		// iterate through first and last columns manually since an out of
+		// bounds Board.getGrid might be buggy
 		for (int y = 0; y < b.getColumnHeight(1); y++) {
 			if (!b.getGrid(0, y) && b.getGrid(1, y)) {
 				wellScore++;
