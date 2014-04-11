@@ -46,9 +46,8 @@ public class WesthillAI implements AI {
 		}
 
 		BoardScore score;
-//		if (boardEquals(board, futureBoard)
-//				&& (piece == futurePiece || piece.equals(futurePiece))) {
-		if (true) {
+		if (boardEquals(board, futureBoard)
+				&& (piece == futurePiece || piece.equals(futurePiece))) {
 			// safety check to make sure boards and pieces are equal
 			try {
 				// retrieve the future move
@@ -348,7 +347,7 @@ class BoardSearcher {
 	 * are unoccupied and bordered. Each well has a different value relative to
 	 * its position on the board. The well's score is calculated by the
 	 * following formula: h * (h + 1) / 2 (Triangular Numbers) where h is the
-	 * height of the well.
+	 * depth of the well.
 	 * 
 	 * @param b
 	 *            the Board
@@ -361,6 +360,7 @@ class BoardSearcher {
 		for (int y = 0; y < b.getColumnHeight(1); y++) {
 			if (!b.getGrid(0, y) && b.getGrid(1, y)) {
 				wellScore++;
+				// add up previous holes to place more weight on deeper wells
 				for (int subY = y - 1; subY >= 0; subY--) {
 					if (!b.getGrid(0, subY)) {
 						wellScore++;
