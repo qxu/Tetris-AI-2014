@@ -62,12 +62,16 @@ public class RunTetris extends JComponent implements Runnable {
 	private Thread runnerThread;
 	private Thread guiUpdater;
 
+	public static RunTetris instance;
+	
 	RunTetris(int width, int height) {
 		super();
 
 		setPreferredSize(new Dimension(width, height));
 
 		tc = new TetrisController();
+		
+		instance = this;
 	}
 
 	void tick(int verb) {

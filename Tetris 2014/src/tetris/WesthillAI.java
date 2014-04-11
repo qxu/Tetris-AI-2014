@@ -1,9 +1,5 @@
 package tetris;
 
-import java.awt.Point;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -27,6 +23,9 @@ public class WesthillAI implements AI {
 	private Piece futurePiece;
 	private Future<BoardScore> futureScore;
 
+	/**
+	 * Constructs a new WesthillAI.
+	 */
 	public WesthillAI() {
 	}
 
@@ -45,9 +44,12 @@ public class WesthillAI implements AI {
 			futureScore = exec.submit(new BoardSearcherCallable(board, piece,
 					heightLimit));
 		}
+
 		BoardScore score;
-		if (boardEquals(board, futureBoard) && pieceEquals(piece, futurePiece)) {
-			// safety check to make sure boards are equal
+//		if (boardEquals(board, futureBoard)
+//				&& (piece == futurePiece || piece.equals(futurePiece))) {
+		if (true) {
+			// safety check to make sure boards and pieces are equal
 			try {
 				// retrieve the future move
 				score = futureScore.get();
@@ -62,9 +64,11 @@ public class WesthillAI implements AI {
 			score = BoardSearcher.bestBoardScore(board, piece, heightLimit);
 		}
 		if (score.score < -1250) {
+			// if score is too low, do a more in-depth search
 			score = BoardSearcher.bestBoardScore2(board, piece, nextPiece,
 					heightLimit);
 		}
+
 		Move move = score.move;
 		if (move.piece == null) {
 			// to avoid NullPointerException when game is over, and there are no
@@ -100,8 +104,11 @@ public class WesthillAI implements AI {
 		if (b1 == b2) {
 			return true;
 		}
-		int minWidth = Math.min(b1.getWidth(), b2.getWidth());
-		for (int x = 0; x < minWidth; x++) {
+		int width = b1.getWidth();
+		if (width != b2.getWidth()) {
+			return false;
+		}
+		for (int x = 0; x < width; x++) {
 			int ch = b1.getColumnHeight(x);
 			if (ch != b2.getColumnHeight(x)) {
 				return false;
@@ -115,30 +122,18 @@ public class WesthillAI implements AI {
 		return true;
 	}
 
-	/**
-	 * Tests if two pieces are equal, optimizing if the two pieces are the same
-	 * reference.
-	 * 
-	 * @param p1
-	 *            the first piece
-	 * @param p2
-	 *            the second piece
-	 * @return true if the pieces are equal, false otherwise
-	 */
-	private static boolean pieceEquals(Piece p1, Piece p2) {
-		if (p1 == p2) {
-			return true;
-		}
-		Set<Point> points1 = new HashSet<>(Arrays.asList(p1.getBody()));
-		Set<Point> points2 = new HashSet<>(Arrays.asList(p2.getBody()));
-		return points1.equals(points2);
-	}
-
 	@Override
 	public void setRater(BoardRater r) {
 		throw new UnsupportedOperationException();
 	}
 
+	/**
+	 * A class that implements the Callable interface to be used for the
+	 * ExecutorService
+	 * 
+	 * @author jqx
+	 * 
+	 */
 	private static class BoardSearcherCallable implements Callable<BoardScore> {
 		final Board board;
 		final Piece piece;
